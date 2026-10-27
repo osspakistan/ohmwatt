@@ -10,6 +10,7 @@ import {
   Time02Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import AppToolbar from '@/components/common/app-toolbar.vue'
@@ -17,6 +18,14 @@ import ThemeToggle from '@/components/common/theme-toggle.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+const transitionName = ref('slide-down')
+
+router.beforeEach((to, from) => {
+  const toIndex = (to.meta.index as number) ?? 0
+  const fromIndex = (from.meta.index as number) ?? 0
+  transitionName.value = toIndex > fromIndex ? 'slide-down' : 'slide-up'
+})
 
 const navItems = [
   { path: '/dashboard', label: 'Now', icon: DashboardSquare01Icon },
@@ -54,9 +63,9 @@ function isActive(path: string) {
             :key="item.path"
             type="button"
             :class="[
-              'group flex h-11 w-12 flex-col items-center justify-center rounded-lg text-[10px] transition-colors cursor-pointer',
+              'group flex h-11 w-12 flex-col items-center justify-center rounded-lg text-[10px] transition-all duration-150 cursor-pointer active:scale-95',
               isActive(item.path)
-                ? 'bg-accent font-medium text-foreground shadow-sm'
+                ? 'bg-accent font-medium text-foreground shadow-sm ring-1 ring-border/50'
                 : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
             ]"
             :title="item.label"
@@ -74,12 +83,12 @@ function isActive(path: string) {
         </div>
       </aside>
 
-      <!-- Active Routed Screen View Host with KeepAlive -->
-      <main class="flex-1 overflow-y-auto">
+      <!-- Active Routed Screen View Host with Directional Desktop Transition -->
+      <main class="relative flex-1 overflow-y-auto overflow-x-hidden">
         <router-view v-slot="{ Component }">
-          <transition name="page-fade" mode="out-in">
+          <transition :name="transitionName" mode="out-in">
             <keep-alive>
-              <component :is="Component" />
+              <component :is="Component" :key="route.path" />
             </keep-alive>
           </transition>
         </router-view>
@@ -89,18 +98,39 @@ function isActive(path: string) {
 </template>
 
 <style scoped>
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1), transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+/* Professional Desktop Micro-Transitions (Apple/macOS Fluid Motion Style) */
+
+/* Navigating downward in the tab rail (toIndex > fromIndex) */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: opacity 0.16s cubic-bezier(0.2, 0, 0, 1), transform 0.16s cubic-bezier(0.2, 0, 0, 1);
+  will-change: opacity, transform;
 }
 
-.page-fade-enter-from {
+.slide-down-enter-from {
   opacity: 0;
-  transform: translateY(2px);
+  transform: translateY(6px);
 }
 
-.page-fade-leave-to {
+.slide-down-leave-to {
   opacity: 0;
-  transform: translateY(-2px);
+  transform: translateY(-6px);
+}
+
+/* Navigating upward in the tab rail (toIndex < fromIndex) */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: opacity 0.16s cubic-bezier(0.2, 0, 0, 1), transform 0.16s cubic-bezier(0.2, 0, 0, 1);
+  will-change: opacity, transform;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 </style>
