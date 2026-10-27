@@ -1,158 +1,93 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core'
-import { ref } from 'vue'
+import ThemeToggle from '@/components/common/theme-toggle.vue'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTheme } from '@/composables/use-theme'
 
-const greetMsg = ref('')
-const name = ref('')
-
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke('greet', { name: name.value })
-}
+const { mode } = useTheme()
 </script>
 
 <template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
+  <div class="flex h-screen w-screen overflow-hidden bg-background text-foreground font-sans">
+    <!-- Slim Navigation Icon Rail -->
+    <aside
+      class="flex w-16 flex-col items-center justify-between border-r border-border bg-card py-5"
+    >
+      <div class="flex flex-col items-center gap-6">
+        <!-- Antlion Brand Mark -->
+        <div
+          class="group relative flex h-10 w-10 items-center justify-center rounded-lg bg-muted p-2 transition-colors hover:bg-accent"
+          title="Antlion Battery Monitor"
+        >
+          <img src="/antlion-mark.svg" alt="Antlion Logo" class="h-6 w-6" />
+        </div>
+      </div>
 
-    <div class="row">
-      <a href="https://vite.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
+      <!-- Bottom controls (Theme Toggle) -->
+      <div class="flex flex-col items-center gap-3">
+        <ThemeToggle />
+      </div>
+    </aside>
 
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
-  </main>
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-8">
+      <header class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="font-serif text-3xl font-semibold tracking-tight">Antlion</h1>
+          <p class="text-sm text-muted-foreground">Desktop battery health and power management</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+          <span>Theme:</span>
+          <span class="rounded bg-muted px-2 py-0.5 text-foreground capitalize">{{ mode }}</span>
+        </div>
+      </header>
+
+      <!-- Welcome Overview Card demonstrating Caffeine Tokens in Dark/Light -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <Card class="border-border bg-card">
+          <CardHeader>
+            <CardTitle class="font-serif text-xl font-medium">Battery Overview</CardTitle>
+            <CardDescription>Live telemetry and health status</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div
+              class="flex items-center justify-between rounded-md border border-border bg-muted/40 p-4"
+            >
+              <span class="text-sm text-muted-foreground">Current Level</span>
+              <span class="font-serif text-3xl font-bold tabular-nums text-foreground">78%</span>
+            </div>
+
+            <div class="flex items-center justify-between rounded-md border border-border p-4">
+              <span class="text-sm text-muted-foreground">Status</span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-secondary/20 px-2.5 py-0.5 text-xs font-medium text-secondary-foreground border border-secondary/40"
+              >
+                ⚡ Plugged in, charging
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card class="border-border bg-card">
+          <CardHeader>
+            <CardTitle class="font-serif text-xl font-medium">Caffeine Theme System</CardTitle>
+            <CardDescription>Theme verification & visual indicators</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-3 text-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Primary Accent:</span>
+              <span class="inline-block h-6 w-16 rounded bg-primary"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">90% Heads-Up Marker:</span>
+              <span class="inline-block h-6 w-16 rounded bg-secondary"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Alert / Critical:</span>
+              <span class="inline-block h-6 w-16 rounded bg-destructive"></span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  </div>
 </template>
-
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-</style>
-<style>
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-</style>
