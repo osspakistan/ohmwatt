@@ -36,7 +36,7 @@ function isActive(path: string) {
 
 <template>
   <div
-    class="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground font-sans antialiased"
+    class="flex h-screen w-screen flex-col overflow-hidden rounded-xl border border-border bg-background text-foreground font-sans antialiased shadow-2xl"
   >
     <!-- Top Window Chrome / Draggable Toolbar -->
     <AppToolbar title="Antlion" />
