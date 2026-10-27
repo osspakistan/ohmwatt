@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import CommandBlock from '@/components/common/command-block.vue'
 import SegmentControl from '@/components/common/segment-control.vue'
+import { HibernateService } from '../../../bindings/changeme/service'
+import type { Diagnostic } from '../../../bindings/changeme/core/hibernate'
 
 const activeOS = ref<'linux' | 'windows' | 'macos'>('linux')
 
@@ -12,21 +14,18 @@ const osOptions = [
   { value: 'macos', label: 'macOS' },
 ]
 
-// Diagnostic checklist for user's EliteBook
-const checklist = [
-  {
-    label: 'Swap space size (19.8 GiB) vs RAM (22 GiB)',
-    status: 'warning',
-    text: 'Recommend extending to 24 GiB',
-  },
-  { label: 'Physical swap file offset', status: 'ready', text: 'Offset: 34816 (/dev/nvme0n1p3)' },
-  {
-    label: 'GRUB kernel resume parameter',
-    status: 'missing',
-    text: 'Missing resume=UUID=... in /etc/default/grub',
-  },
-  { label: 'Secure Boot Lockdown', status: 'ready', text: 'Disabled (Will not block hibernation)' },
-]
+const diag = ref<Diagnostic | null>(null)
+
+onMounted(async () => {
+  try {
+    const res = await HibernateService.GetDiagnostic()
+    if (res) {
+      diag.value = res
+    }
+  } catch (err) {
+    console.warn('Failed to load hibernate diagnostic:', err)
+  }
+})
 </script>
 
 <template>
@@ -49,96 +48,98 @@ const checklist = [
           <div class="text-sm font-semibold text-destructive uppercase tracking-wide">
             System Configuration Notice
           </div>
-          <p class="text-xs text-muted-foreground mt-1">
-            Editing bootloader parameters and swap images alters core system initialization. Always
-            ensure critical files are backed up before applying system modifications.
+          <p class="text-sm text-foreground/80 mt-1">
+            Hibernation writes active RAM contents directly to disk swap. Follow the verified commands
+            below to prevent boot-looping or lost sessions.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Diagnostic State -->
-    <div v-if="activeOS === 'linux'" class="space-y-6">
-      <div class="rounded-xl border border-border bg-card p-5">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Diagnostic Analysis: HP EliteBook 850 G7
-        </h2>
-
-        <div class="space-y-3">
-          <div
-            v-for="(item, idx) in checklist"
-            :key="idx"
-            class="flex items-center justify-between border-b border-border py-2 last:border-0"
-          >
-            <div>
-              <div class="text-sm font-medium text-foreground">{{ item.label }}</div>
-              <div class="text-xs text-muted-foreground">{{ item.text }}</div>
-            </div>
-            <span
-              :class="[
-                'text-xs font-mono uppercase font-semibold px-2 py-0.5 rounded',
-                item.status === 'ready'
-                  ? 'bg-secondary/20 text-secondary-foreground'
-                  : item.status === 'warning'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-muted text-muted-foreground',
-              ]"
-            >
-              {{ item.status }}
-            </span>
+    <!-- Live System Readiness Checklist (F26) -->
+    <div v-if="activeOS === 'linux'" class="mb-10">
+      <h2 class="text-xs uppercase font-mono tracking-wider text-muted-foreground mb-4">
+        Live System Readiness (Kernel Diagnostic)
+      </h2>
+      <div class="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
+        <div
+          v-for="item in diag?.checks || []"
+          :key="item.title"
+          class="p-4 flex items-center justify-between flex-wrap gap-3"
+        >
+          <div class="space-y-1">
+            <div class="text-sm font-medium text-foreground">{{ item.title }}</div>
+            <div class="text-xs text-muted-foreground">{{ item.detail }}</div>
           </div>
+          <span
+            :class="[
+              'text-xs font-mono uppercase font-semibold px-2 py-0.5 rounded',
+              item.passed
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+            ]"
+          >
+            {{ item.passed ? 'Ready' : 'Action Needed' }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <!-- Step-by-Step Tailored Recipe Blocks -->
-      <div class="space-y-4">
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Configuration Steps (Copy & Paste to Terminal)
-        </h3>
+    <!-- Instructions Tabs -->
+    <div v-if="activeOS === 'linux'" class="space-y-6">
+      <h2 class="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+        Step-by-Step Ubuntu / Debian Commands
+      </h2>
 
+      <div class="space-y-3">
+        <div class="text-sm font-medium">1. Ensure Sufficient Swap Allocation</div>
+        <p class="text-xs text-muted-foreground">
+          Allocate a swapfile that comfortably accommodates your {{ diag?.ramSizeGiB ?? 22 }} GiB RAM:
+        </p>
         <CommandBlock
-          label="1. Add Resume Parameters to GRUB (/etc/default/grub)"
-          command='GRUB_CMDLINE_LINUX_DEFAULT="quiet splash resume=UUID=88bbefa2-dd83-4049-8ede-c17fbc61898c resume_offset=34816"'
+          command="sudo fallocate -l 24G /swap.img && sudo chmod 600 /swap.img && sudo mkswap /swap.img && sudo swapon /swap.img"
         />
+      </div>
 
+      <div class="space-y-3">
+        <div class="text-sm font-medium">2. Find Swap Physical Offset</div>
+        <p class="text-xs text-muted-foreground">
+          Query the first block physical offset for the kernel resume loader:
+        </p>
+        <CommandBlock command="sudo filefrag -v /swap.img | head -n 4" />
+      </div>
+
+      <div class="space-y-3">
+        <div class="text-sm font-medium">3. Update GRUB Resume Target</div>
+        <p class="text-xs text-muted-foreground">
+          Append resume UUID and resume_offset to /etc/default/grub:
+        </p>
         <CommandBlock
-          label="2. Rebuild GRUB & Initramfs"
-          command="sudo update-grub && sudo update-initramfs -u -k all"
+          command="sudo nano /etc/default/grub && sudo update-grub && sudo update-initramfs -u -k all"
         />
-
-        <CommandBlock label="3. Test System Hibernation" command="sudo systemctl hibernate" />
       </div>
     </div>
 
     <!-- Windows Tab -->
-    <div v-else-if="activeOS === 'windows'" class="space-y-4">
-      <div class="rounded-xl border border-border bg-card p-5">
-        <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Windows Power Configuration
-        </h2>
-        <p class="text-xs text-muted-foreground mb-4">
-          Windows handles hibernation through the standard Windows power management utility. Open an
-          elevated Command Prompt or PowerShell and run:
-        </p>
-        <CommandBlock
-          command="powercfg /hibernate on"
-          label="Enable Hibernation (Admin PowerShell)"
-        />
+    <div v-else-if="activeOS === 'windows'" class="space-y-6">
+      <h2 class="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+        Windows Powercfg Setup
+      </h2>
+      <div class="space-y-3">
+        <div class="text-sm font-medium">Enable Full Hibernation File</div>
+        <CommandBlock command="powercfg.exe /hibernate on" />
+        <CommandBlock command="powercfg.exe /h /type full" />
       </div>
     </div>
 
     <!-- macOS Tab -->
-    <div v-else class="space-y-4">
-      <div class="rounded-xl border border-border bg-card p-5">
-        <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          macOS Standby Modes
-        </h2>
-        <p class="text-xs text-muted-foreground mb-4">
-          macOS regulates sleep and hibernation via
-          <code class="font-mono text-xs">pmset hibernatemode</code>. Inspect your active power
-          management profile:
-        </p>
-        <CommandBlock command="pmset -g | grep hibernatemode" label="Inspect macOS Hibernatemode" />
+    <div v-else class="space-y-6">
+      <h2 class="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+        macOS Standby / SafeSleep
+      </h2>
+      <div class="space-y-3">
+        <div class="text-sm font-medium">Set Hibernatemode 25 (Deep Zero-Drain)</div>
+        <CommandBlock command="sudo pmset -a hibernatemode 25" />
       </div>
     </div>
   </div>

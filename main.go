@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"log"
-	"time"
+
+	"changeme/core/battery"
+	"changeme/platform/linux"
+	"changeme/service"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -13,17 +17,27 @@ var assets embed.FS
 
 func init() {
 	application.RegisterEvent[string]("time")
-	application.RegisterEvent[*BatteryState]("battery:updated")
+	application.RegisterEvent[*battery.State]("battery:updated")
 }
 
 func main() {
-	batterySvc := NewBatteryService()
+	// Initialize Platform Hardware Backend
+	linuxBackend := linux.NewLinuxBackend()
+
+	// Initialize Application Services
+	batterySvc := service.NewBatteryService(linuxBackend)
+	deviceSvc := service.NewDeviceService(linuxBackend)
+	hibernateSvc := service.NewHibernateService(linuxBackend)
+	historySvc := service.NewHistoryService()
 
 	app := application.New(application.Options{
 		Name:        "Antlion",
-		Description: "Quiet, calm battery monitor & power management for Linux",
+		Description: "Calm, precision battery monitor & power management for Linux",
 		Services: []application.Service{
 			application.NewService(batterySvc),
+			application.NewService(deviceSvc),
+			application.NewService(hibernateSvc),
+			application.NewService(historySvc),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -33,7 +47,7 @@ func main() {
 		},
 	})
 
-	// Main Application Window: Frameless with custom window chrome & Caffeine theme
+	// Main Application Window: Frameless with Caffeine dark background #111111
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:     "Antlion — Battery Management",
 		Width:     1060,
@@ -41,22 +55,27 @@ func main() {
 		MinWidth:  860,
 		MinHeight: 600,
 		Frameless: true,
-		BackgroundColour: application.NewRGB(24, 20, 19),
+		BackgroundColour: application.NewRGB(17, 17, 17),
 		URL: "/",
 	})
 
-	// Telemetry ticker: Emit real-time battery readings every 2 seconds
-	go func() {
-		for {
-			state, err := batterySvc.GetBatteryState()
-			if err == nil && state != nil {
-				app.Event.Emit("battery:updated", state)
-			}
-			time.Sleep(2 * time.Second)
-		}
-	}()
+	// Background Hardware Event Watcher: Zero-polling interrupt loop
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	err := app.Run()
+	events, err := linuxBackend.WatchEvents(ctx)
+	if err == nil {
+		go func() {
+			for range events {
+				st, err := linuxBackend.GetLiveState()
+				if err == nil && st != nil {
+					app.Event.Emit("battery:updated", st)
+				}
+			}
+		}()
+	}
+
+	err = app.Run()
 	if err != nil {
 		log.Fatal(err)
 	}

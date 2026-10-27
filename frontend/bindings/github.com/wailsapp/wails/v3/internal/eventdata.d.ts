@@ -7,12 +7,12 @@ import type { Events } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import type * as main$0 from "../../../../../changeme/models.js";
+import type * as battery$0 from "../../../../../changeme/core/battery/models.js";
 
 declare module "@wailsio/runtime" {
     namespace Events {
         interface CustomEvents {
-            "battery:updated": main$0.BatteryState | null;
+            "battery:updated": battery$0.State | null;
             "time": string;
         }
     }
