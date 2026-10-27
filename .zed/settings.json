@@ -1,0 +1,48 @@
+{
+  "format_on_save": "on",
+  "languages": {
+    "Vue": {
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "language_servers": ["vue-language-server", "eslint", "!typescript-language-server", "..."]
+    },
+    "TypeScript": {
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "language_servers": ["vtsls", "eslint", "..."]
+    },
+    "JavaScript": {
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "language_servers": ["vtsls", "eslint", "..."]
+    },
+    "JSON": {
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    },
+    "CSS": {
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
