@@ -3,7 +3,7 @@ import ThemeToggle from '@/components/common/theme-toggle.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from '@/composables/use-theme'
 
-const { mode } = useTheme()
+const { mode, isDark } = useTheme()
 </script>
 
 <template>
@@ -13,12 +13,16 @@ const { mode } = useTheme()
       class="flex w-16 flex-col items-center justify-between border-r border-border bg-card py-5"
     >
       <div class="flex flex-col items-center gap-6">
-        <!-- Antlion Brand Mark -->
+        <!-- Antlion Brand Mark (Dynamic Light/Dark) -->
         <div
           class="group relative flex h-10 w-10 items-center justify-center rounded-lg bg-muted p-2 transition-colors hover:bg-accent"
           title="Antlion Battery Monitor"
         >
-          <img src="/antlion-mark.svg" alt="Antlion Logo" class="h-6 w-6" />
+          <img
+            :src="isDark ? '/antlion-mark-dark.svg' : '/antlion-mark-light.svg'"
+            alt="Antlion Logo"
+            class="h-6 w-6 transition-all"
+          />
         </div>
       </div>
 
