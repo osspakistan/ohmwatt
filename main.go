@@ -33,13 +33,14 @@ func main() {
 		},
 	})
 
-	// Main Application Window: 1060 x 740, Caffeine theme background #181413
+	// Main Application Window: Frameless with custom window chrome & Caffeine theme
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:  "Antlion — Battery Management",
-		Width:  1060,
-		Height: 740,
-		MinWidth: 860,
+		Title:     "Antlion — Battery Management",
+		Width:     1060,
+		Height:    740,
+		MinWidth:  860,
 		MinHeight: 600,
+		Frameless: true,
 		BackgroundColour: application.NewRGB(24, 20, 19),
 		URL: "/",
 	})
