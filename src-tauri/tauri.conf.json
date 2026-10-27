@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "antlion-app",
+  "productName": "Antlion",
   "version": "0.1.0",
-  "identifier": "com.i-appreciate-it.antlion-app",
+  "identifier": "com.antlion.battery-manager",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "antlion-app",
-        "width": 800,
-        "height": 600
+        "title": "Antlion",
+        "width": 960,
+        "height": 660,
+        "minWidth": 800,
+        "minHeight": 560,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {
@@ -26,6 +30,7 @@
     "targets": "all",
     "icon": [
       "icons/32x32.png",
+      "icons/64x64.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
