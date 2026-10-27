@@ -1,27 +1,15 @@
-import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/layouts/app-layout.vue'
 
-// Detect desktop Tauri environment
-export const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
-
-const rootRoute: RouteRecordRaw = isTauri
-  ? {
-      path: '/',
-      name: 'root',
-      redirect: '/app/dashboard',
-    }
-  : {
-      path: '/',
-      name: 'landing',
-      component: () => import('@/features/landing/landing-view.vue'),
-    }
-
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    rootRoute,
+    {
+      path: '/',
+      name: 'landing',
+      component: () => import('@/features/landing/landing-view.vue'),
+    },
     {
       path: '/app',
       component: AppLayout,
