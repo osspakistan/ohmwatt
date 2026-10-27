@@ -19,14 +19,14 @@ const route = useRoute()
 const router = useRouter()
 
 const navItems = [
-  { path: '/app/dashboard', label: 'Now', icon: DashboardSquare01Icon },
-  { path: '/app/health', label: 'Health', icon: FavouriteIcon },
-  { path: '/app/history', label: 'History', icon: Time02Icon },
-  { path: '/app/device', label: 'Device', icon: LaptopIcon },
-  { path: '/app/alerts', label: 'Alerts', icon: Notification01Icon },
-  { path: '/app/hibernate', label: 'Hibernate', icon: Moon02Icon },
-  { path: '/app/reports', label: 'Reports', icon: File01Icon },
-  { path: '/app/settings', label: 'Settings', icon: Settings01Icon },
+  { path: '/dashboard', label: 'Now', icon: DashboardSquare01Icon },
+  { path: '/health', label: 'Health', icon: FavouriteIcon },
+  { path: '/history', label: 'History', icon: Time02Icon },
+  { path: '/device', label: 'Device', icon: LaptopIcon },
+  { path: '/alerts', label: 'Alerts', icon: Notification01Icon },
+  { path: '/hibernate', label: 'Hibernate', icon: Moon02Icon },
+  { path: '/reports', label: 'Reports', icon: File01Icon },
+  { path: '/settings', label: 'Settings', icon: Settings01Icon },
 ]
 
 function isActive(path: string) {

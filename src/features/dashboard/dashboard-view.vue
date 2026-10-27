@@ -172,7 +172,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
           <button
             type="button"
             class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group"
-            @click="router.push('/app/health')"
+            @click="router.push('/health')"
           >
             <div>
               <span class="font-serif text-2xl font-medium">91%</span>
@@ -190,7 +190,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
           <button
             type="button"
             class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group border-t border-border/60 pt-3"
-            @click="router.push('/app/device')"
+            @click="router.push('/device')"
           >
             <span class="text-sm text-muted-foreground"> HP EliteBook 850 G7 · SMP battery </span>
             <span

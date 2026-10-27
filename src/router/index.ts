@@ -7,13 +7,8 @@ export const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'landing',
-      component: () => import('@/features/landing/landing-view.vue'),
-    },
-    {
-      path: '/app',
       component: AppLayout,
-      redirect: '/app/dashboard',
+      redirect: '/dashboard',
       children: [
         {
           path: 'dashboard',
@@ -56,6 +51,11 @@ export const router = createRouter({
           component: () => import('@/features/settings/settings-view.vue'),
         },
       ],
+    },
+    // Fallback: redirect any unknown paths to /dashboard
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/dashboard',
     },
   ],
 })
