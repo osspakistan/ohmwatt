@@ -1,6 +1,14 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import AppLayout from '@/layouts/app-layout.vue'
+import DashboardView from '@/features/dashboard/dashboard-view.vue'
+import HealthView from '@/features/health/health-view.vue'
+import HistoryView from '@/features/history/history-view.vue'
+import DeviceView from '@/features/device/device-view.vue'
+import AlertsView from '@/features/alerts/alerts-view.vue'
+import HibernateView from '@/features/hibernate/hibernate-view.vue'
+import ReportsView from '@/features/reports/reports-view.vue'
+import SettingsView from '@/features/settings/settings-view.vue'
 
 export const router = createRouter({
   history: createWebHashHistory(),
@@ -13,49 +21,44 @@ export const router = createRouter({
         {
           path: 'dashboard',
           name: 'dashboard',
-          component: () => import('@/features/dashboard/dashboard-view.vue'),
+          component: DashboardView,
         },
         {
           path: 'health',
           name: 'health',
-          component: () => import('@/features/health/health-view.vue'),
+          component: HealthView,
         },
         {
           path: 'history',
           name: 'history',
-          component: () => import('@/features/history/history-view.vue'),
+          component: HistoryView,
         },
         {
           path: 'device',
           name: 'device',
-          component: () => import('@/features/device/device-view.vue'),
+          component: DeviceView,
         },
         {
           path: 'alerts',
           name: 'alerts',
-          component: () => import('@/features/alerts/alerts-view.vue'),
+          component: AlertsView,
         },
         {
           path: 'hibernate',
           name: 'hibernate',
-          component: () => import('@/features/hibernate/hibernate-view.vue'),
+          component: HibernateView,
         },
         {
           path: 'reports',
           name: 'reports',
-          component: () => import('@/features/reports/reports-view.vue'),
+          component: ReportsView,
         },
         {
           path: 'settings',
           name: 'settings',
-          component: () => import('@/features/settings/settings-view.vue'),
+          component: SettingsView,
         },
       ],
-    },
-    // Fallback: redirect any unknown paths to /dashboard
-    {
-      path: '/:pathMatch(.*)*',
-      redirect: '/dashboard',
     },
   ],
 })

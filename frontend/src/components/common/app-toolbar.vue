@@ -2,7 +2,7 @@
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Window } from '@wailsio/runtime'
-import { computed, ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 withDefaults(
@@ -17,26 +17,40 @@ withDefaults(
 const router = useRouter()
 const isMaximized = ref(false)
 
-const canGoBack = computed(() => {
-  if (typeof window !== 'undefined' && window.history) {
-    return window.history.state?.back !== null
+// Vue Router History Stack Tracker
+const historyStack = ref<string[]>([window.location.hash || '#/dashboard'])
+const currentIndex = ref(0)
+
+router.afterEach((to) => {
+  const target = `#${to.fullPath}`
+  if (historyStack.value[currentIndex.value] !== target) {
+    // If user navigated forward to a new route, discard forward redo stack
+    historyStack.value = historyStack.value.slice(0, currentIndex.value + 1)
+    historyStack.value.push(target)
+    currentIndex.value = historyStack.value.length - 1
   }
-  return false
 })
 
-const canGoForward = computed(() => {
-  if (typeof window !== 'undefined' && window.history) {
-    return window.history.state?.forward !== null
-  }
-  return false
-})
+function canGoBack() {
+  return currentIndex.value > 0
+}
+
+function canGoForward() {
+  return currentIndex.value < historyStack.value.length - 1
+}
 
 function goBack() {
-  router.back()
+  if (canGoBack()) {
+    currentIndex.value--
+    router.back()
+  }
 }
 
 function goForward() {
-  router.forward()
+  if (canGoForward()) {
+    currentIndex.value++
+    router.forward()
+  }
 }
 
 function handleMinimize() {
@@ -72,16 +86,16 @@ function handleClose() {
   >
     <!-- Brand Icon, Title & Navigation History Controls -->
     <div class="flex items-center gap-3" style="--wails-draggable: no-drag;">
-      <!-- Back / Forward Buttons -->
+      <!-- Functional Back / Forward Buttons -->
       <div class="flex items-center gap-0.5">
         <button
           type="button"
-          :disabled="!canGoBack"
+          :disabled="!canGoBack()"
           :class="[
             'flex h-7 w-7 items-center justify-center rounded transition',
-            canGoBack
+            canGoBack()
               ? 'text-foreground hover:bg-muted hover:text-primary cursor-pointer'
-              : 'text-muted-foreground/40 cursor-not-allowed',
+              : 'text-muted-foreground/30 cursor-not-allowed',
           ]"
           title="Back (Alt+Left)"
           aria-label="Go Back"
@@ -92,12 +106,12 @@ function handleClose() {
 
         <button
           type="button"
-          :disabled="!canGoForward"
+          :disabled="!canGoForward()"
           :class="[
             'flex h-7 w-7 items-center justify-center rounded transition',
-            canGoForward
+            canGoForward()
               ? 'text-foreground hover:bg-muted hover:text-primary cursor-pointer'
-              : 'text-muted-foreground/40 cursor-not-allowed',
+              : 'text-muted-foreground/30 cursor-not-allowed',
           ]"
           title="Forward (Alt+Right)"
           aria-label="Go Forward"

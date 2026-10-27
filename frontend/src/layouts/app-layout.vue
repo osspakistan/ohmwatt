@@ -54,7 +54,7 @@ function isActive(path: string) {
             :key="item.path"
             type="button"
             :class="[
-              'group flex h-11 w-12 flex-col items-center justify-center rounded-lg text-[10px] transition-colors',
+              'group flex h-11 w-12 flex-col items-center justify-center rounded-lg text-[10px] transition-colors cursor-pointer',
               isActive(item.path)
                 ? 'bg-accent font-medium text-foreground shadow-sm'
                 : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
@@ -74,11 +74,13 @@ function isActive(path: string) {
         </div>
       </aside>
 
-      <!-- Active Routed Screen View Host -->
+      <!-- Active Routed Screen View Host with KeepAlive -->
       <main class="flex-1 overflow-y-auto">
         <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
+          <transition name="page-fade" mode="out-in">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
           </transition>
         </router-view>
       </main>
@@ -87,13 +89,18 @@ function isActive(path: string) {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s ease;
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1), transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.page-fade-enter-from {
   opacity: 0;
+  transform: translateY(2px);
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-2px);
 }
 </style>
