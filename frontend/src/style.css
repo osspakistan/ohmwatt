@@ -1,3 +1,4 @@
+@import '@fontsource/instrument-sans';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -50,12 +51,9 @@
   --sidebar-border: #ebebeb;
   --sidebar-ring: #b5b5b5;
 
-  /* Typography Stacks */
-  --font-sans:
-    'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    sans-serif;
-  --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', serif;
-  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Typography Stacks (Original shadcn theme setup) */
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-sans);
 
   /* Dimensions & Spacing */
   --radius: 0.5rem;
@@ -145,8 +143,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
-  --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
