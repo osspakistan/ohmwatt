@@ -5,13 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "bun run check && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "run-s \"lint:*\"",
-    "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache",
-    "format": "oxfmt src/"
+    "format": "oxfmt src/",
+    "lint": "eslint . --cache",
+    "lint:fix": "run-s \"lint:fix:*\"",
+    "lint:fix:oxlint": "oxlint . --fix",
+    "lint:fix:eslint": "eslint . --fix --cache",
+    "fix": "bun run format && bun run lint:fix",
+    "type": "vue-tsc --noEmit",
+    "check": "bun run fix && bun run lint && bun run type",
+    "shadcn": "bunx --bun shadcn-vue@latest add"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.3.5",
@@ -30,6 +35,8 @@
     "@vue/eslint-config-typescript": "^14.9.0",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-check-file": "^3.3.2",
+    "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-oxlint": "^1.89.0",
     "eslint-plugin-vue": "^10.12.0",
     "jiti": "^2.7.0",

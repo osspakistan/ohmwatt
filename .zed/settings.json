@@ -1,48 +1,63 @@
 {
-  "format_on_save": "on",
+  "autosave": "on_focus_change",
+  "language_servers": ["eslint", "vue-language-server", "typescript-language-server"],
+  "language_server_options": {
+    "eslint": {
+      "language_ids": ["vue", "typescript", "javascript", "typescriptreact", "javascriptreact"],
+      "initialization_options": {
+        "run_formatter": true
+      }
+    }
+  },
   "languages": {
-    "Vue": {
-      "formatter": {
-        "external": {
-          "command": "bunx",
-          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
-        }
-      },
-      "language_servers": ["vue-language-server", "eslint", "!typescript-language-server", "..."]
-    },
     "TypeScript": {
       "formatter": {
-        "external": {
-          "command": "bunx",
-          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        "code_actions": {
+          "source.fixAll.eslint": true
         }
       },
-      "language_servers": ["vtsls", "eslint", "..."]
+      "format_on_save": "on"
+    },
+    "Vue": {
+      "formatter": {
+        "code_actions": {
+          "source.fixAll.eslint": true
+        }
+      },
+      "format_on_save": "on"
     },
     "JavaScript": {
       "formatter": {
-        "external": {
-          "command": "bunx",
-          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+        "code_actions": {
+          "source.fixAll.eslint": true
         }
       },
-      "language_servers": ["vtsls", "eslint", "..."]
-    },
-    "JSON": {
-      "formatter": {
-        "external": {
-          "command": "bunx",
-          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+      "format_on_save": "on"
+    }
+  },
+  "lsp": {
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "formatting": true
         }
       }
     },
-    "CSS": {
-      "formatter": {
-        "external": {
-          "command": "bunx",
-          "arguments": ["oxfmt", "--stdin-filepath", "{buffer_path}"]
+    "vue-language-server": {
+      "initialization_options": {
+        "typescript": {
+          "tsdk": "node_modules/typescript/lib"
         }
       }
     }
+  },
+  "formatter": {
+    "code_actions": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
   }
 }

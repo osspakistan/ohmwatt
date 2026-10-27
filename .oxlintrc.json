@@ -6,5 +6,12 @@
   },
   "categories": {
     "correctness": "error"
-  }
+  },
+  "ignorePatterns": [
+    "**/components/ui/**",
+    "**/src-tauri/**",
+    "**/vite-env.d.ts",
+    "vite.config.ts",
+    "tsconfig.json"
+  ]
 }
