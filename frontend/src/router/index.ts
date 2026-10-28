@@ -68,5 +68,10 @@ export const router = createRouter({
         },
       ],
     },
+    // Fallback: redirect any unknown paths to /dashboard
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/dashboard',
+    },
   ],
 })
