@@ -101,19 +101,22 @@ func (b *LinuxBackend) GetLiveState() (*battery.State, error) {
 	currentNowMicro := parseNum(props["POWER_SUPPLY_CURRENT_NOW"])
 	powerNowMicro := parseNum(props["POWER_SUPPLY_POWER_NOW"])
 
-	if powerNowMicro > 0 {
-		state.PowerWatts = float64(powerNowMicro) / 1_000_000.0
-	} else if currentNowMicro > 0 && state.VoltageVolts > 0 {
-		state.PowerWatts = (float64(currentNowMicro) / 1_000_000.0) * state.VoltageVolts
+	absCurrentMicro := math.Abs(float64(currentNowMicro))
+	absPowerMicro := math.Abs(float64(powerNowMicro))
+
+	if absPowerMicro > 0 {
+		state.PowerWatts = absPowerMicro / 1_000_000.0
+	} else if absCurrentMicro > 0 && state.VoltageVolts > 0 {
+		state.PowerWatts = (absCurrentMicro / 1_000_000.0) * state.VoltageVolts
 	}
 
-	if currentNowMicro > 0 {
-		state.CurrentAmperes = float64(currentNowMicro) / 1_000_000.0
+	if absCurrentMicro > 0 {
+		state.CurrentAmperes = absCurrentMicro / 1_000_000.0
 		if state.Status == "Discharging" && chargeNow > 0 {
-			hours := float64(chargeNow) / float64(currentNowMicro)
+			hours := float64(chargeNow) / absCurrentMicro
 			state.TimeToEmptyMins = int(hours * 60)
 		} else if state.Status == "Charging" && chargeFull > chargeNow {
-			hours := float64(chargeFull-chargeNow) / float64(currentNowMicro)
+			hours := float64(chargeFull-chargeNow) / absCurrentMicro
 			state.TimeToFullMins = int(hours * 60)
 		}
 	}
