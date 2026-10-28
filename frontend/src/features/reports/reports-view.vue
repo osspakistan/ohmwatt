@@ -1,9 +1,41 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+import type { DeviceSpecs } from '../../../bindings/changeme/core/hardware'
+import { DeviceService } from '../../../bindings/changeme/service'
+
+import { useBattery } from '@/composables/use-battery'
+
+const { battery } = useBattery()
+const specs = ref<DeviceSpecs | null>(null)
 
 const includeHistory = ref(true)
 const includeDeviceSpecs = ref(true)
 const includeSerials = ref(false) // Masked by default (DEC-17)
+
+const currentDate = computed(() =>
+  new Date().toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }),
+)
+
+const designMwh = computed(() => {
+  const mwh = Math.round(battery.value.designCapacity * 11.55)
+  return mwh.toLocaleString()
+})
+
+onMounted(async () => {
+  try {
+    const s = await DeviceService.GetDeviceSpecs()
+    if (s) {
+      specs.value = s
+    }
+  } catch (err) {
+    console.debug('Failed to query device specs in report:', err)
+  }
+})
 </script>
 
 <template>
@@ -83,35 +115,41 @@ const includeSerials = ref(false) // Masked by default (DEC-17)
               >Antlion Battery Inspection Certificate</span
             >
           </div>
-          <span class="font-mono text-xs text-muted-foreground">Generated: Oct 27, 2026</span>
+          <span class="font-mono text-xs text-muted-foreground">Generated: {{ currentDate }}</span>
         </div>
 
         <!-- Certificate Summary -->
         <div class="grid grid-cols-2 gap-4">
           <div>
             <div class="text-xs text-muted-foreground">Machine</div>
-            <div class="font-medium text-sm text-foreground">HP EliteBook 850 G7</div>
+            <div class="font-medium text-sm text-foreground">
+              {{ specs?.laptopModel || 'Linux Laptop' }}
+            </div>
           </div>
           <div>
             <div class="text-xs text-muted-foreground">Health Condition</div>
-            <div class="font-medium text-sm text-primary">Normal · Grade A (91%)</div>
+            <div class="font-medium text-sm text-primary">
+              {{ battery.healthPercentage >= 80 ? 'Normal · Grade A' : 'Service Recommended' }} ({{
+                battery.healthPercentage
+              }}%)
+            </div>
           </div>
           <div>
             <div class="text-xs text-muted-foreground">Cycle Count</div>
-            <div class="font-mono text-sm text-foreground">212 cycles</div>
+            <div class="font-mono text-sm text-foreground">{{ battery.cycleCount }} cycles</div>
           </div>
           <div>
             <div class="text-xs text-muted-foreground">Design Capacity</div>
-            <div class="font-mono text-sm text-foreground">53,010 mWh</div>
+            <div class="font-mono text-sm text-foreground">{{ designMwh }} mWh</div>
           </div>
         </div>
 
         <div
           class="rounded-lg bg-muted/60 p-4 text-xs font-mono text-muted-foreground leading-relaxed"
         >
-          This battery operates at 91.0% retained capacity relative to OEM factory specifications.
-          Chemical degradation rate is measured at ~0.04% per cycle. No cell imbalances or thermal
-          throttling anomalies detected.
+          This battery operates at {{ battery.healthPercentage }}% retained capacity relative to OEM
+          factory specifications. Physical fuel gauge logs {{ battery.cycleCount }} lifetime cycles.
+          Chemical degradation rate is measured across historical sysfs telemetry.
         </div>
       </div>
     </div>

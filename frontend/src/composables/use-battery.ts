@@ -24,22 +24,22 @@ export interface BatteryTelemetry {
 }
 
 const battery = ref<BatteryTelemetry>({
-  percentage: 88,
-  status: 'Discharging',
+  percentage: 0,
+  status: 'Detecting...',
   isCharging: false,
   isAcConnected: false,
-  powerWatts: 14.2,
-  voltageVolts: 11.8,
-  currentAmperes: 1.2,
-  healthPercentage: 80,
-  cycleCount: 1210,
-  designCapacity: 4850,
-  currentCapacity: 3415,
-  fullCapacity: 3872,
-  temperatureC: 29.5,
-  timeToEmptyMins: 210,
+  powerWatts: 0,
+  voltageVolts: 0,
+  currentAmperes: 0,
+  healthPercentage: 0,
+  cycleCount: 0,
+  designCapacity: 0,
+  currentCapacity: 0,
+  fullCapacity: 0,
+  temperatureC: 0,
+  timeToEmptyMins: 0,
   timeToFullMins: 0,
-  lastUpdated: 'Just now',
+  lastUpdated: 'Connecting to hardware...',
 })
 
 const isConnected = ref(true)

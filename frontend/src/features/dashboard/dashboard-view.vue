@@ -29,8 +29,8 @@ const chargerWattage = computed(() =>
 )
 const isUnderpowered = ref(false)
 
-const deviceLabel = ref('HP EliteBook 850 G7')
-const batteryLabel = ref('SMP battery')
+const deviceLabel = ref('Detecting device...')
+const batteryLabel = ref('Hardware battery')
 
 onMounted(async () => {
   try {

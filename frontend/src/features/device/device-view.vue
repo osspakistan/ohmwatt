@@ -17,28 +17,28 @@ const tabOptions = [
 ]
 
 const specs = ref<DeviceSpecs>({
-  batteryManufacturer: 'Hewlett-Packard',
-  batteryModel: 'Primary',
-  batterySerial: '05494 2021/02/19',
-  batteryTechnology: 'Li-ion',
-  designCapacityWh: '56.0 Wh',
-  fullChargeWh: '44.7 Wh',
-  designVoltage: '11.55 V',
-  laptopManufacturer: 'HP',
-  laptopModel: 'HP EliteBook 850 G7 Notebook PC',
-  laptopSerial: '5CG112233X',
-  biosVersion: 'S73 Ver. 01.16.00',
-  totalMemoryRAM: '22 GiB',
-  kernelVersion: 'Linux',
+  batteryManufacturer: 'Loading...',
+  batteryModel: 'Loading...',
+  batterySerial: 'Loading...',
+  batteryTechnology: 'Loading...',
+  designCapacityWh: '—',
+  fullChargeWh: '—',
+  designVoltage: '—',
+  laptopManufacturer: 'Loading...',
+  laptopModel: 'Loading...',
+  laptopSerial: 'Loading...',
+  biosVersion: 'Loading...',
+  totalMemoryRAM: 'Loading...',
+  kernelVersion: 'Loading...',
 })
 
 const adapter = ref<AdapterInfo>({
   isConnected: false,
-  type: 'USB Power Delivery 3.0',
-  negotiatedWatts: 65.0,
-  currentDrawWatts: 14.2,
-  voltageVolts: 20.0,
-  amperes: 3.25,
+  type: 'Detecting...',
+  negotiatedWatts: 0,
+  currentDrawWatts: 0,
+  voltageVolts: 0,
+  amperes: 0,
   isUnderpowered: false,
 })
 

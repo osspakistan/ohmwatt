@@ -1,11 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
-const currentHealth = ref(91)
-const cycleCount = ref(212)
-const forecastDate = ref('March 2028')
-const hoursAtHighStress = ref(42) // Hours spent at 100% or >90% this month
-const deepDischarges = ref(3) // Discharges below 10%
+import { BatteryService } from '../../../bindings/changeme/service'
+
+import { useBattery } from '@/composables/use-battery'
+
+const { battery } = useBattery()
+
+const currentHealth = computed(() => battery.value.healthPercentage)
+const cycleCount = computed(() => battery.value.cycleCount)
+const designWh = computed(() => ((battery.value.designCapacity * 11.55) / 1000).toFixed(1))
+const currentWh = computed(() => ((battery.value.fullCapacity * 11.55) / 1000).toFixed(1))
+
+const lostPercent = computed(() => Math.max(0, 100 - currentHealth.value))
+const hatchedHeight = computed(() => Math.max(4, Math.round((lostPercent.value / 100) * 142)))
+const retainedHeight = computed(() => 142 - hatchedHeight.value)
+const retainedY = computed(() => 14 + hatchedHeight.value)
+
+const forecastDate = ref('Calculating...')
+const hoursAtHighStress = ref(0)
+const deepDischarges = ref(0)
+
+onMounted(async () => {
+  try {
+    const h = await BatteryService.GetBatteryHealth()
+    if (h) {
+      if (h.estimatedDate80) forecastDate.value = h.estimatedDate80
+      hoursAtHighStress.value = h.hoursAtHighStress ?? 0
+      deepDischarges.value = h.deepDischarges ?? 0
+    }
+  } catch (err) {
+    console.debug('Failed to query battery health:', err)
+  }
+})
 </script>
 
 <template>
@@ -73,11 +100,11 @@ const deepDischarges = ref(3) // Discharges below 10%
             When new
           </text>
           <text x="50" y="202" text-anchor="middle" font-size="12" fill="var(--muted-foreground)">
-            53.0 Wh
+            {{ designWh }} Wh
           </text>
         </g>
 
-        <!-- Right Battery: Today (91% with lost 9% hatched) -->
+        <!-- Right Battery: Today (dynamic lost % hatched) -->
         <g transform="translate(170, 0)">
           <rect x="38" y="2" width="24" height="9" rx="3" fill="currentColor" />
           <rect
@@ -90,10 +117,17 @@ const deepDischarges = ref(3) // Discharges below 10%
             stroke="currentColor"
             stroke-width="3"
           />
-          <!-- Lost capacity hatched top block (9%) -->
-          <rect x="6" y="14" width="88" height="13" rx="3" fill="url(#hatched)" />
-          <!-- Retained capacity fill (91%) -->
-          <rect x="6" y="27" width="88" height="129" rx="16" fill="var(--primary)" />
+          <!-- Lost capacity hatched top block -->
+          <rect x="6" y="14" width="88" :height="hatchedHeight" rx="3" fill="url(#hatched)" />
+          <!-- Retained capacity fill -->
+          <rect
+            x="6"
+            :y="retainedY"
+            width="88"
+            :height="retainedHeight"
+            rx="16"
+            fill="var(--primary)"
+          />
           <text
             x="50"
             y="184"
@@ -105,7 +139,7 @@ const deepDischarges = ref(3) // Discharges below 10%
             Today
           </text>
           <text x="50" y="202" text-anchor="middle" font-size="12" fill="var(--muted-foreground)">
-            48.2 Wh (91%)
+            {{ currentWh }} Wh ({{ currentHealth }}%)
           </text>
         </g>
       </svg>
@@ -115,7 +149,9 @@ const deepDischarges = ref(3) // Discharges below 10%
     <div class="mt-8 grid gap-4 sm:grid-cols-2">
       <div class="rounded-lg border border-border bg-card p-4">
         <div class="text-xs uppercase tracking-wider text-muted-foreground">Condition Rating</div>
-        <div class="font-serif text-2xl font-medium text-foreground mt-1">Normal · Grade A</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">
+          {{ currentHealth >= 80 ? 'Normal · Grade A' : 'Service Recommended' }}
+        </div>
         <p class="text-xs text-muted-foreground mt-1">
           Capacity decay is within healthy manufacturer parameters for {{ cycleCount }} cycles.
         </p>
@@ -125,9 +161,9 @@ const deepDischarges = ref(3) // Discharges below 10%
         <div class="text-xs uppercase tracking-wider text-muted-foreground">
           80% Health Projection
         </div>
-        <div class="font-serif text-2xl font-medium text-foreground mt-1">~{{ forecastDate }}</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">{{ forecastDate }}</div>
         <p class="text-xs text-muted-foreground mt-1">
-          Based on linear regression of daily capacity snapshots.
+          Based on degradation rate over completed hardware charge cycles.
         </p>
       </div>
     </div>
@@ -135,7 +171,7 @@ const deepDischarges = ref(3) // Discharges below 10%
     <!-- Stress Factors & Time-at-Charge (F32) -->
     <div class="mt-8 border-t border-border pt-6">
       <h2 class="text-sm font-semibold tracking-wide uppercase text-muted-foreground mb-4">
-        Battery Aging Stress Factors (This Month)
+        Battery Aging Stress Factors
       </h2>
       <div class="space-y-3">
         <div class="flex items-center justify-between border-b border-border py-2.5">
