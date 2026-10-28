@@ -45,7 +45,7 @@ Antlion captures real physical telemetry directly from Linux kernel sysfs regist
 4. **Transient State Loss**: Most tools discard session history upon closing. When your laptop reboots or wakes from suspend, the charge session history is lost.
 5. **Privacy Violations**: Many popular power monitoring tools bundle analytics SDKs, crash reporters, and cloud sync services that phone home with machine serials and usage logs.
 
-### The Solution We Offer
+### The Solution
 
 - **Direct Kernel Telemetry**: Reads raw voltage (`voltage_now`), micro-amperes (`current_now`), power draw (`power_now`), micro-watt-hours (`energy_now` / `charge_now`), and ACPI cycle counts directly from `/sys/class/power_supply/`.
 - **Strict Zero-Mock Engineering**: Zero fake numbers, zero synthetic seed data, zero simulated curves. If hardware lacks dual batteries, the secondary vessel UI is automatically hidden.
@@ -332,7 +332,7 @@ The planned release architecture will use [nfpm](https://github.com/goreleaser/n
 
 ## Contribution & Engineering Directives
 
-We welcome contributions from systems engineers and frontend developers. All contributions must adhere to our engineering standards:
+Contributions from systems engineers and frontend developers are welcome. All changes must adhere to the project's engineering standards:
 
 ### 1. Zero-Mock Policy
 Antlion is an engineering telemetry monitor. **Never hardcode fake numbers**, mock dates, static cycle counts (e.g. `212`), fake health values (e.g. `91%`), or synthetic DB seed sessions. If a machine lacks dual batteries (`BAT1`), the UI must gracefully adapt and hide the secondary vessel. Never show `(mock)` labels to end users.
@@ -343,7 +343,7 @@ Before submitting any pull request, ensure:
 2. `go build -o bin/antlion .` compiles cleanly with **0 errors**.
 
 ### 3. Git Commit Convention
-We follow atomic, conventional commits:
+The repository enforces atomic, conventional commits:
 - `feat(scope): ...` for new features
 - `fix(scope): ...` for bug fixes
 - `refactor(scope): ...` for internal structural improvements
@@ -372,7 +372,7 @@ We follow atomic, conventional commits:
 
 ## Privacy & Offline Guarantee
 
-Antlion was built on the principle that hardware telemetry belongs exclusively to the machine owner:
+Hardware telemetry belongs exclusively to the machine owner:
 - **Zero Network Calls**: Antlion makes zero outgoing HTTP, DNS, or socket calls.
 - **Zero Analytics SDKs**: No Google Analytics, no PostHog, no Sentry, no crash collectors.
 - **Local SQLite Storage**: All recorded telemetry stays inside `~/.local/share/antlion/antlion.db`.
