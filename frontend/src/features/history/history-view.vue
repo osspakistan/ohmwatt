@@ -266,7 +266,6 @@ onUnmounted(() => {
                 {{ activeSession.peakTemp }}
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -325,7 +324,6 @@ onUnmounted(() => {
                   {{ s.peakTemp }}
                 </div>
               </div>
-
             </div>
           </div>
         </div>

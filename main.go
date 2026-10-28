@@ -52,6 +52,7 @@ func main() {
 	deviceSvc := service.NewDeviceService(linuxBackend)
 	hibernateSvc := service.NewHibernateService(linuxBackend)
 	historySvc := service.NewHistoryService(db)
+	screenshotSvc := service.NewScreenshotService()
 
 	app := application.New(application.Options{
 		Name:        "Antlion",
@@ -61,6 +62,7 @@ func main() {
 			application.NewService(deviceSvc),
 			application.NewService(hibernateSvc),
 			application.NewService(historySvc),
+			application.NewService(screenshotSvc),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

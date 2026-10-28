@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import { ArrowLeft01Icon, ArrowRight01Icon, Camera02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Window } from '@wailsio/runtime'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { useScreenshot } from '@/composables/use-screenshot'
 
 withDefaults(
   defineProps<{
@@ -16,6 +18,33 @@ withDefaults(
 
 const router = useRouter()
 const isMaximized = ref(false)
+const { captureWindow, isCapturing } = useScreenshot()
+const captureNotice = ref('')
+
+async function handleCapture() {
+  const path = await captureWindow('#app')
+  if (path) {
+    captureNotice.value = 'Captured'
+    setTimeout(() => {
+      captureNotice.value = ''
+    }, 2000)
+  }
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
+    e.preventDefault()
+    handleCapture()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown)
+})
 
 // Vue Router History Stack Tracker
 const historyStack = ref<string[]>([window.location.hash || '#/dashboard'])
@@ -152,8 +181,29 @@ function handleClose() {
       @dblclick="handleToggleMaximize"
     />
 
-    <!-- Window Action Controls: Minimize, Maximize/Restore, Close -->
+    <!-- Window Action Controls: High-Res Snapshot, Minimize, Maximize/Restore, Close -->
     <div class="flex items-center gap-1" style="--wails-draggable: no-drag">
+      <!-- High-Res Window Snapshot (Method A) -->
+      <button
+        type="button"
+        class="flex h-7 px-1.5 items-center gap-1 rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary cursor-pointer disabled:opacity-50 text-xs font-mono"
+        :disabled="isCapturing"
+        title="Capture High-Res Screenshot (Ctrl+Shift+S)"
+        aria-label="Capture High-Res Screenshot"
+        @click="handleCapture"
+      >
+        <HugeiconsIcon
+          :icon="Camera02Icon"
+          class="h-3.5 w-3.5"
+          :class="isCapturing ? 'animate-spin text-primary' : ''"
+        />
+        <span v-if="captureNotice" class="text-[10px] text-primary font-medium tracking-tight">
+          {{ captureNotice }}
+        </span>
+      </button>
+
+      <div class="h-3.5 w-[1px] bg-border/60 mx-0.5" />
+
       <!-- Minimize -->
       <button
         type="button"

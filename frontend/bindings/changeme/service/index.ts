@@ -5,9 +5,11 @@ import * as BatteryService from "./batteryservice.js";
 import * as DeviceService from "./deviceservice.js";
 import * as HibernateService from "./hibernateservice.js";
 import * as HistoryService from "./historyservice.js";
+import * as ScreenshotService from "./screenshotservice.js";
 export {
     BatteryService,
     DeviceService,
     HibernateService,
-    HistoryService
+    HistoryService,
+    ScreenshotService
 };

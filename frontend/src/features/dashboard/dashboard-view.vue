@@ -2,7 +2,8 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { DeviceService, BatteryService } from '../../../bindings/changeme/service'
+import type { ChargeSession } from '../../../bindings/changeme/core/store/models'
+import { DeviceService, BatteryService, HistoryService } from '../../../bindings/changeme/service'
 
 import LiquidVessel from './components/liquid-vessel.vue'
 
@@ -18,9 +19,15 @@ const isCharging = computed(() => battery.value.isCharging)
 const headsUpThreshold = ref(90)
 const batteryCount = ref(1) // Automatically detected from hardware (1 or 2)
 const voltage = computed(() => `${battery.value.voltageVolts} V`)
-const current = computed(
-  () => `${(battery.value.powerWatts / (battery.value.voltageVolts || 1)).toFixed(2)} A`,
-)
+const current = computed(() => {
+  if (battery.value.currentAmperes > 0) {
+    return `${battery.value.currentAmperes.toFixed(2)} A`
+  }
+  if (battery.value.powerWatts > 0 && battery.value.voltageVolts > 0) {
+    return `${(battery.value.powerWatts / battery.value.voltageVolts).toFixed(2)} A`
+  }
+  return '—'
+})
 const temperature = computed(() => `${battery.value.temperatureC} °C`)
 const chargerWattage = computed(() =>
   battery.value.isAcConnected
@@ -31,6 +38,9 @@ const isUnderpowered = ref(false)
 
 const deviceLabel = ref('Detecting device...')
 const batteryLabel = ref('Hardware battery')
+
+const recordedSessions = ref<ChargeSession[]>([])
+const activeSession = ref<ChargeSession | null>(null)
 
 onMounted(async () => {
   try {
@@ -55,6 +65,17 @@ onMounted(async () => {
   } catch (err) {
     console.debug('Failed to query battery count:', err)
   }
+
+  try {
+    const [recent, active] = await Promise.all([
+      HistoryService.GetRecentSessions(),
+      HistoryService.GetActiveSession(),
+    ])
+    if (recent) recordedSessions.value = recent
+    if (active) activeSession.value = active
+  } catch (err) {
+    console.debug('Failed to load session timeline for hour strip:', err)
+  }
 })
 
 const sentence = computed(() => {
@@ -69,18 +90,96 @@ const sentence = computed(() => {
     const mins = battery.value.timeToEmptyMins % 60
     return `About ${hrs > 0 ? hrs + ' hours ' : ''}${mins} minutes of battery remaining.`
   }
-  return `Discharging at ${battery.value.powerWatts} W.`
+  if (battery.value.powerWatts > 0) {
+    return `Discharging at ${battery.value.powerWatts} W.`
+  }
+  return 'Operating on battery power.'
 })
 
-// Hour strip data: 48 half-hour slots
-const hourSlots = Array.from({ length: 48 }, (_, i) => {
-  const h = i / 2
-  const level = h < 14 ? 100 - h * 5.7 : 20 + (h - 14) * 5.8
-  const charging = h >= 14
-  return {
-    height: Math.max(8, Math.min(100, Math.round(level))),
-    charging,
+// Hour strip: 48 real 30-minute intervals across today (00:00 - 23:59)
+const hourSlots = computed(() => {
+  const now = new Date()
+  const currentSlot = Math.min(
+    47,
+    Math.max(0, Math.floor((now.getHours() * 60 + now.getMinutes()) / 30)),
+  )
+
+  const slots = Array.from({ length: 48 }, (_, i) => {
+    return {
+      index: i,
+      height: 0,
+      charging: false,
+      isRecorded: false,
+      isFuture: i > currentSlot,
+      isCurrent: i === currentSlot,
+    }
+  })
+
+  // Mark current slot with live telemetry
+  slots[currentSlot] = {
+    index: currentSlot,
+    height: Math.max(8, percentage.value),
+    charging: isCharging.value,
+    isRecorded: true,
+    isFuture: false,
+    isCurrent: true,
   }
+
+  // Populate today's slots from recorded sessions
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  for (const s of recordedSessions.value) {
+    const sStart = new Date(s.startTime).getTime()
+    const sEnd = new Date(s.endTime).getTime()
+    if (sEnd < startOfDay) continue
+
+    const startSlot = Math.max(
+      0,
+      Math.floor((Math.max(sStart, startOfDay) - startOfDay) / (30 * 60 * 1000)),
+    )
+    const endSlot = Math.min(currentSlot, Math.floor((sEnd - startOfDay) / (30 * 60 * 1000)))
+
+    for (let i = startSlot; i <= endSlot; i++) {
+      if (i === currentSlot) continue
+      const ratio = endSlot > startSlot ? (i - startSlot) / (endSlot - startSlot) : 1
+      const pct = Math.round(s.startPct + (s.endPct - s.startPct) * ratio)
+      slots[i] = {
+        index: i,
+        height: Math.max(8, pct),
+        charging: s.isCharging,
+        isRecorded: true,
+        isFuture: false,
+        isCurrent: false,
+      }
+    }
+  }
+
+  // If there is an active session underway today
+  if (activeSession.value) {
+    const sStart = new Date(activeSession.value.startTime).getTime()
+    const startSlot = Math.max(
+      0,
+      Math.floor((Math.max(sStart, startOfDay) - startOfDay) / (30 * 60 * 1000)),
+    )
+    for (let i = startSlot; i < currentSlot; i++) {
+      const slot = slots[i]
+      if (slot && !slot.isRecorded) {
+        const ratio = currentSlot > startSlot ? (i - startSlot) / (currentSlot - startSlot) : 0
+        const pct = Math.round(
+          activeSession.value.startPct + (percentage.value - activeSession.value.startPct) * ratio,
+        )
+        slots[i] = {
+          index: i,
+          height: Math.max(8, pct),
+          charging: isCharging.value,
+          isRecorded: true,
+          isFuture: false,
+          isCurrent: false,
+        }
+      }
+    }
+  }
+
+  return slots
 })
 </script>
 
@@ -252,7 +351,6 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
               >
             </div>
           </div>
-
         </div>
 
         <!-- Hour-by-Hour 24h Bar Strip (F01, F22) -->
@@ -270,9 +368,24 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
               v-for="(slot, i) in hourSlots"
               :key="i"
               class="flex-1 rounded-xs transition-all hover:opacity-80"
-              :class="slot.charging ? 'bg-primary' : 'bg-muted-foreground/35'"
-              :style="{ height: `${slot.height}%` }"
-              :title="`Slot ${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'} — ${slot.height}% (${slot.charging ? 'Charging' : 'On Battery'})`"
+              :class="[
+                slot.isRecorded
+                  ? slot.charging
+                    ? 'bg-primary'
+                    : 'bg-muted-foreground/45'
+                  : slot.isFuture
+                    ? 'bg-muted-foreground/10 h-[2px]'
+                    : 'bg-muted-foreground/20 h-[2px]',
+                slot.isCurrent ? 'ring-1 ring-primary/40' : '',
+              ]"
+              :style="slot.isRecorded ? { height: `${slot.height}%` } : undefined"
+              :title="
+                slot.isFuture
+                  ? `Slot ${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'} (Upcoming)`
+                  : slot.isRecorded
+                    ? `Slot ${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'} — ${slot.height}% (${slot.charging ? 'Charging' : 'On Battery'})`
+                    : `Slot ${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'} (No activity recorded)`
+              "
             />
           </div>
 
