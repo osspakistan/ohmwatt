@@ -252,12 +252,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
               >
             </div>
           </div>
-          <div
-            class="text-xs uppercase font-mono tracking-wider text-muted-foreground hover:text-primary flex items-center gap-1"
-          >
-            <span>Cycle Ledger</span>
-            <span>→</span>
-          </div>
+
         </div>
 
         <!-- Hour-by-Hour 24h Bar Strip (F01, F22) -->
