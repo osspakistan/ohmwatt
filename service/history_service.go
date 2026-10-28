@@ -1,57 +1,39 @@
 package service
 
 import (
-	"time"
 	"changeme/core/store"
+	"changeme/storage/sqlite"
 )
 
-// HistoryService serves charging session logs and degradation trends.
-type HistoryService struct{}
-
-// NewHistoryService constructs a new HistoryService.
-func NewHistoryService() *HistoryService {
-	return &HistoryService{}
+// HistoryService serves charging session logs and degradation trends from SQLite.
+type HistoryService struct {
+	db *sqlite.DB
 }
 
-// GetRecentSessions returns chronological charge/discharge sessions.
+// NewHistoryService constructs a new HistoryService backed by SQLite.
+func NewHistoryService(db *sqlite.DB) *HistoryService {
+	return &HistoryService{db: db}
+}
+
+// GetRecentSessions returns chronological charge/discharge sessions from SQLite.
 func (s *HistoryService) GetRecentSessions() ([]store.ChargeSession, error) {
-	now := time.Now()
-	return []store.ChargeSession{
-		{
-			ID:         "sess-01",
-			StartTime:  now.Add(-2 * time.Hour),
-			EndTime:    now.Add(-40 * time.Minute),
-			Duration:   "1h 20m",
-			StartPct:   32,
-			EndPct:     88,
-			AvgWatts:   "38.5 W",
-			PeakTemp:   "34.2 °C",
-			IsHot:      false,
-			IsCharging: true,
-		},
-		{
-			ID:         "sess-02",
-			StartTime:  now.Add(-6 * time.Hour),
-			EndTime:    now.Add(-2 * time.Hour),
-			Duration:   "4h 00m",
-			StartPct:   91,
-			EndPct:     32,
-			AvgWatts:   "12.4 W",
-			PeakTemp:   "31.0 °C",
-			IsHot:      false,
-			IsCharging: false,
-		},
-		{
-			ID:         "sess-03",
-			StartTime:  now.Add(-24 * time.Hour),
-			EndTime:    now.Add(-22 * time.Hour),
-			Duration:   "1h 45m",
-			StartPct:   18,
-			EndPct:     91,
-			AvgWatts:   "42.1 W",
-			PeakTemp:   "41.5 °C",
-			IsHot:      true,
-			IsCharging: true,
-		},
-	}, nil
+	if s.db == nil {
+		return []store.ChargeSession{}, nil
+	}
+	sessions, err := s.db.GetRecentSessions(30)
+	if err != nil {
+		return nil, err
+	}
+	if len(sessions) == 0 {
+		return []store.ChargeSession{}, nil
+	}
+	return sessions, nil
+}
+
+// GetDailySnapshots returns daily snapshots for health degradation charts.
+func (s *HistoryService) GetDailySnapshots(days int) ([]store.DailySnapshot, error) {
+	if s.db == nil {
+		return []store.DailySnapshot{}, nil
+	}
+	return s.db.GetSnapshots(days)
 }

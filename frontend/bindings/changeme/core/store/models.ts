@@ -24,3 +24,16 @@ export interface ChargeSession {
      */
     "isCharging": boolean;
 }
+
+/**
+ * DailySnapshot represents a daily record of battery health and cycle count.
+ */
+export interface DailySnapshot {
+    /**
+     * YYYY-MM-DD
+     */
+    "date": string;
+    "healthPercentage": number;
+    "capacityWh": number;
+    "cycleCount": number;
+}
