@@ -22,12 +22,13 @@ const { captureWindow, isCapturing } = useScreenshot()
 const captureNotice = ref('')
 
 async function handleCapture() {
-  const path = await captureWindow('#app')
+  const currentPath = router.currentRoute.value.path.replace(/^\//, '') || 'dashboard'
+  const path = await captureWindow('#app', currentPath)
   if (path) {
-    captureNotice.value = 'Captured'
+    captureNotice.value = 'Saved to Downloads'
     setTimeout(() => {
       captureNotice.value = ''
-    }, 2000)
+    }, 2500)
   }
 }
 
