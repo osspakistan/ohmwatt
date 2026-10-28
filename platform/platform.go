@@ -28,6 +28,9 @@ type BatteryBackend interface {
 	// SetChargeCeiling writes hardware charging thresholds if supported.
 	SetChargeCeiling(ceiling int) (bool, string)
 
+	// GetBatteryCount returns the number of physical battery packs detected.
+	GetBatteryCount() int
+
 	// WatchEvents streams interrupt-driven power events (UPower D-Bus).
 	WatchEvents(ctx context.Context) (<-chan battery.PowerEvent, error)
 }

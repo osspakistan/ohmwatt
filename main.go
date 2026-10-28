@@ -86,7 +86,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go runSessionRecorder(ctx, linuxBackend, db, app)
+	go runSessionRecorder(ctx, linuxBackend, db, historySvc, app)
 
 	err = app.Run()
 	if err != nil {
@@ -95,7 +95,7 @@ func main() {
 }
 
 // runSessionRecorder logs real charging and discharging sessions into SQLite.
-func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sqlite.DB, app *application.App) {
+func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sqlite.DB, historySvc *service.HistoryService, app *application.App) {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
@@ -104,8 +104,11 @@ func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sq
 		startPct   int
 		startTime  time.Time
 		peakTemp   float64
+		peakWatts  float64
 		wattSum    float64
-		wattCount  int
+		voltSum    float64
+		ampSum     float64
+		sampleCt   int
 	}
 
 	var current *activeState
@@ -123,12 +126,8 @@ func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sq
 			// Broadcast live telemetry to UI
 			app.Event.Emit("battery:updated", st)
 
-			if db == nil {
-				continue
-			}
-
 			// Track stress conditions
-			if st.TemperatureC > 38.0 {
+			if db != nil && st.TemperatureC > 38.0 {
 				_ = db.IncrementStressHours(2.0 / 3600.0) // 2 seconds in hours
 			}
 
@@ -139,46 +138,134 @@ func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sq
 					startPct:   st.Percentage,
 					startTime:  time.Now(),
 					peakTemp:   st.TemperatureC,
+					peakWatts:  st.PowerWatts,
 					wattSum:    st.PowerWatts,
-					wattCount:  1,
+					voltSum:    st.VoltageVolts,
+					ampSum:     st.CurrentAmperes,
+					sampleCt:   1,
 				}
-				continue
+			} else {
+				// Accumulate metrics
+				current.wattSum += st.PowerWatts
+				current.voltSum += st.VoltageVolts
+				current.ampSum += st.CurrentAmperes
+				current.sampleCt++
+				if st.TemperatureC > current.peakTemp {
+					current.peakTemp = st.TemperatureC
+				}
+				if st.PowerWatts > current.peakWatts {
+					current.peakWatts = st.PowerWatts
+				}
 			}
 
-			// Accumulate metrics
-			current.wattSum += st.PowerWatts
-			current.wattCount++
-			if st.TemperatureC > current.peakTemp {
-				current.peakTemp = st.TemperatureC
+			// Keep live ongoing session object updated
+			if historySvc != nil && current != nil {
+				elapsed := time.Since(current.startTime)
+				durStr := fmt.Sprintf("%dm", int(elapsed.Minutes()))
+				if elapsed.Minutes() < 1 {
+					durStr = "< 1m"
+				} else if elapsed.Hours() >= 1 {
+					durStr = fmt.Sprintf("%dh %02dm", int(elapsed.Hours()), int(elapsed.Minutes())%60)
+				}
+
+				avgW := current.wattSum / float64(current.sampleCt)
+				avgV := current.voltSum / float64(current.sampleCt)
+				avgA := current.ampSum / float64(current.sampleCt)
+				deltaPct := st.Percentage - current.startPct
+				cycleDeltaStr := fmt.Sprintf("%+.2f", float64(deltaPct)/100.0)
+				energyWh := fmt.Sprintf("%.1f Wh", avgW*elapsed.Hours())
+
+				chargerType := "Internal Battery Rail"
+				if st.IsCharging {
+					chargerType = "USB-PD 65W AC Adapter"
+				}
+
+				thermalStatus := "Nominal (<38°C)"
+				if current.peakTemp >= 40.0 {
+					thermalStatus = "Thermal Stress (>40°C)"
+				} else if current.peakTemp >= 38.0 {
+					thermalStatus = "Elevated (38-40°C)"
+				}
+
+				liveSess := &store.ChargeSession{
+					ID:              "live-active-session",
+					StartTime:       current.startTime,
+					EndTime:         time.Now(),
+					Duration:        durStr,
+					StartPct:        current.startPct,
+					EndPct:          st.Percentage,
+					CycleDelta:      cycleDeltaStr,
+					AvgWatts:        fmt.Sprintf("%.1f W", avgW),
+					PeakWatts:       fmt.Sprintf("%.1f W", current.peakWatts),
+					AvgVolts:        fmt.Sprintf("%.2f V", avgV),
+					AvgAmps:         fmt.Sprintf("%.2f A", avgA),
+					PeakTemp:        fmt.Sprintf("%.1f °C", current.peakTemp),
+					EnergyWh:        energyWh,
+					ChargerType:     chargerType,
+					ThermalStatus:   thermalStatus,
+					HealthAtSession: st.HealthPercentage,
+					IsHot:           current.peakTemp >= 40.0,
+					IsCharging:      current.isCharging,
+					IsOngoing:       true,
+				}
+				historySvc.SetActiveSession(liveSess)
 			}
 
 			// Detect deep discharge crossing (<15%)
-			if st.Percentage <= 15 && current.startPct > 15 {
+			if db != nil && current != nil && st.Percentage <= 15 && current.startPct > 15 {
 				_ = db.IncrementDeepDischarges()
 			}
 
-			// State transition (plugged in OR unplugged) or percentage delta > 5%
-			if current.isCharging != st.IsCharging {
+			// State transition (plugged in OR unplugged)
+			if current != nil && current.isCharging != st.IsCharging {
 				endTime := time.Now()
 				durationMins := int(endTime.Sub(current.startTime).Minutes())
-				if durationMins >= 1 { // Only log meaningful sessions (> 1 min)
-					avgW := current.wattSum / float64(current.wattCount)
+				if db != nil && durationMins >= 1 { // Only persist sessions lasting >= 1 min
+					avgW := current.wattSum / float64(current.sampleCt)
+					avgV := current.voltSum / float64(current.sampleCt)
+					avgA := current.ampSum / float64(current.sampleCt)
 					durStr := fmt.Sprintf("%dm", durationMins)
 					if durationMins >= 60 {
 						durStr = fmt.Sprintf("%dh %02dm", durationMins/60, durationMins%60)
 					}
 
+					deltaPct := st.Percentage - current.startPct
+					cycleDeltaStr := fmt.Sprintf("%+.2f", float64(deltaPct)/100.0)
+					hours := endTime.Sub(current.startTime).Hours()
+					energyWh := fmt.Sprintf("%.1f Wh", avgW*hours)
+
+					chargerType := "Internal Battery Rail"
+					if current.isCharging {
+						chargerType = "USB-PD 65W AC Adapter"
+					}
+
+					thermalStatus := "Nominal (<38°C)"
+					if current.peakTemp >= 40.0 {
+						thermalStatus = "Thermal Stress (>40°C)"
+					} else if current.peakTemp >= 38.0 {
+						thermalStatus = "Elevated (38-40°C)"
+					}
+
 					sess := &store.ChargeSession{
-						ID:         fmt.Sprintf("sess-%d", time.Now().Unix()),
-						StartTime:  current.startTime,
-						EndTime:    endTime,
-						Duration:   durStr,
-						StartPct:   current.startPct,
-						EndPct:     st.Percentage,
-						AvgWatts:   fmt.Sprintf("%.1f W", avgW),
-						PeakTemp:   fmt.Sprintf("%.1f °C", current.peakTemp),
-						IsHot:      current.peakTemp >= 40.0,
-						IsCharging: current.isCharging,
+						ID:              fmt.Sprintf("sess-%d", time.Now().Unix()),
+						StartTime:       current.startTime,
+						EndTime:         endTime,
+						Duration:        durStr,
+						StartPct:        current.startPct,
+						EndPct:          st.Percentage,
+						CycleDelta:      cycleDeltaStr,
+						AvgWatts:        fmt.Sprintf("%.1f W", avgW),
+						PeakWatts:       fmt.Sprintf("%.1f W", current.peakWatts),
+						AvgVolts:        fmt.Sprintf("%.2f V", avgV),
+						AvgAmps:         fmt.Sprintf("%.2f A", avgA),
+						PeakTemp:        fmt.Sprintf("%.1f °C", current.peakTemp),
+						EnergyWh:        energyWh,
+						ChargerType:     chargerType,
+						ThermalStatus:   thermalStatus,
+						HealthAtSession: st.HealthPercentage,
+						IsHot:           current.peakTemp >= 40.0,
+						IsCharging:      current.isCharging,
+						IsOngoing:       false,
 					}
 					_ = db.RecordSession(sess)
 				}
@@ -189,8 +276,11 @@ func runSessionRecorder(ctx context.Context, backend *linux.LinuxBackend, db *sq
 					startPct:   st.Percentage,
 					startTime:  time.Now(),
 					peakTemp:   st.TemperatureC,
+					peakWatts:  st.PowerWatts,
 					wattSum:    st.PowerWatts,
-					wattCount:  1,
+					voltSum:    st.VoltageVolts,
+					ampSum:     st.CurrentAmperes,
+					sampleCt:   1,
 				}
 			}
 		}

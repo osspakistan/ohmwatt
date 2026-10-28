@@ -17,6 +17,7 @@ export default defineConfigWithVueTs(
     '**/dist-ssr/**',
     '**/coverage/**',
     '**/components/ui/**',
+    '**/bindings/**',
     '**/src-tauri/**',
     '**/vite-env.d.ts',
     'vite.config.ts',

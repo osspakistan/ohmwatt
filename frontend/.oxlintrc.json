@@ -9,6 +9,7 @@
   },
   "ignorePatterns": [
     "**/components/ui/**",
+    "**/bindings/**",
     "**/src-tauri/**",
     "**/vite-env.d.ts",
     "vite.config.ts",

@@ -305,6 +305,15 @@ func (b *LinuxBackend) WatchEvents(ctx context.Context) (<-chan battery.PowerEve
 	return events, nil
 }
 
+// GetBatteryCount returns the number of physical battery packs detected in sysfs.
+func (b *LinuxBackend) GetBatteryCount() int {
+	matches, err := filepath.Glob("/sys/class/power_supply/BAT*")
+	if err != nil || len(matches) == 0 {
+		return 1
+	}
+	return len(matches)
+}
+
 func (b *LinuxBackend) findBatteryPath() string {
 	batPath := "/sys/class/power_supply/BAT0"
 	if _, err := os.Stat(batPath); err == nil {

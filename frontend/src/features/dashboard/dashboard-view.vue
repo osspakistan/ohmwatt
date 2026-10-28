@@ -2,7 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { DeviceService } from '../../../bindings/changeme/service'
+import { DeviceService, BatteryService } from '../../../bindings/changeme/service'
 
 import LiquidVessel from './components/liquid-vessel.vue'
 
@@ -16,7 +16,7 @@ const { battery } = useBattery()
 const percentage = computed(() => battery.value.percentage)
 const isCharging = computed(() => battery.value.isCharging)
 const headsUpThreshold = ref(90)
-const batteryCount = ref(1) // Toggle 1 or 2
+const batteryCount = ref(1) // Automatically detected from hardware (1 or 2)
 const voltage = computed(() => `${battery.value.voltageVolts} V`)
 const current = computed(
   () => `${(battery.value.powerWatts / (battery.value.voltageVolts || 1)).toFixed(2)} A`,
@@ -45,6 +45,15 @@ onMounted(async () => {
     }
   } catch (err) {
     console.debug('Failed to query device specs on dashboard:', err)
+  }
+
+  try {
+    const count = await BatteryService.GetBatteryCount()
+    if (count && count > 0) {
+      batteryCount.value = count
+    }
+  } catch (err) {
+    console.debug('Failed to query battery count:', err)
   }
 })
 
@@ -103,15 +112,6 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
           :heads-up-threshold="headsUpThreshold"
           :is-charging="isCharging"
         />
-
-        <!-- Multi-Battery Toggle (Lenovo T480 / dual battery style) -->
-        <button
-          type="button"
-          class="mt-3 text-xs font-mono text-muted-foreground/60 hover:text-foreground transition underline underline-offset-4 cursor-pointer"
-          @click="batteryCount = batteryCount === 1 ? 2 : 1"
-        >
-          {{ batteryCount === 1 ? 'Show dual battery (mock)' : 'Single battery mode' }}
-        </button>
 
         <!-- Quick Jump Links (Under battery vessel) -->
         <div class="w-full mt-6 space-y-3 border-t border-border pt-4">

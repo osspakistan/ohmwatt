@@ -29,3 +29,8 @@ func (s *BatteryService) GetBatteryHealth() (*battery.Health, error) {
 func (s *BatteryService) SetChargeCeiling(ceiling int) (bool, string) {
 	return s.backend.SetChargeCeiling(ceiling)
 }
+
+// GetBatteryCount returns how many physical battery devices are installed.
+func (s *BatteryService) GetBatteryCount() (int, error) {
+	return s.backend.GetBatteryCount(), nil
+}

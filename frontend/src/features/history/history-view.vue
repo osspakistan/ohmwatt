@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 import type { ChargeSession, DailySnapshot } from '../../../bindings/changeme/core/store'
 import { HistoryService } from '../../../bindings/changeme/service'
@@ -24,6 +24,7 @@ const rangeOptions = [
   { value: '10d', label: 'Last 10 Days' },
 ]
 
+const activeSession = ref<ChargeSession | null>(null)
 const realSessions = ref<ChargeSession[]>([])
 const dailySnapshots = ref<DailySnapshot[]>([])
 const selectedSession = ref<ChargeSession | null>(null)
@@ -36,10 +37,19 @@ function openSession(s: ChargeSession) {
 
 async function loadHistory() {
   try {
+    const ongoing = await HistoryService.GetActiveSession()
+    if (ongoing) {
+      activeSession.value = ongoing
+      if (sheetOpen.value && selectedSession.value?.isOngoing) {
+        selectedSession.value = ongoing
+      }
+    }
+
     const s = await HistoryService.GetRecentSessions()
     if (s && s.length > 0) {
       realSessions.value = s
     }
+
     const d = await HistoryService.GetDailySnapshots(30)
     if (d && d.length > 0) {
       dailySnapshots.value = d
@@ -49,49 +59,20 @@ async function loadHistory() {
   }
 }
 
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   loadHistory()
+  pollTimer = setInterval(() => {
+    loadHistory()
+  }, 2000)
 })
 
-// Baseline fallback sessions if DB was freshly initialized today
-const fallbackSessions: ChargeSession[] = [
-  {
-    id: 's1',
-    startTime: new Date(Date.now() - 48 * 60000).toISOString(),
-    endTime: new Date().toISOString(),
-    duration: '48m',
-    startPct: 22,
-    endPct: 78,
-    avgWatts: '26.4 W',
-    peakTemp: '36.2 °C',
-    isHot: false,
-    isCharging: true,
-  },
-  {
-    id: 's2',
-    startTime: new Date(Date.now() - 86400000).toISOString(),
-    endTime: new Date(Date.now() - 86400000 + 72 * 60000).toISOString(),
-    duration: '1h 12m',
-    startPct: 15,
-    endPct: 90,
-    avgWatts: '31.2 W',
-    peakTemp: '42.0 °C',
-    isHot: true,
-    isCharging: true,
-  },
-  {
-    id: 's3',
-    startTime: new Date(Date.now() - 172800000).toISOString(),
-    endTime: new Date(Date.now() - 172800000 + 35 * 60000).toISOString(),
-    duration: '35m',
-    startPct: 40,
-    endPct: 75,
-    avgWatts: '24.1 W',
-    peakTemp: '33.0 °C',
-    isHot: false,
-    isCharging: true,
-  },
-]
+onUnmounted(() => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+  }
+})
 </script>
 
 <template>
@@ -118,19 +99,26 @@ const fallbackSessions: ChargeSession[] = [
       <div class="rounded-xl border border-border bg-card p-4">
         <div class="text-[10px] uppercase font-mono text-muted-foreground">Logged Sessions</div>
         <div class="font-serif text-2xl font-medium text-foreground mt-1">
-          {{ realSessions.length > 0 ? realSessions.length : fallbackSessions.length }}
+          {{ realSessions.length + (activeSession ? 1 : 0) }}
         </div>
-        <div class="text-[11px] text-muted-foreground mt-0.5">In local database</div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">Recorded cycles</div>
       </div>
       <div class="rounded-xl border border-border bg-card p-4">
         <div class="text-[10px] uppercase font-mono text-muted-foreground">Avg Duration</div>
-        <div class="font-serif text-2xl font-medium text-foreground mt-1">48m</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">
+          {{ realSessions.length > 0 ? realSessions[0].duration : '52m' }}
+        </div>
         <div class="text-[11px] text-muted-foreground mt-0.5">Per charge cycle</div>
       </div>
       <div class="rounded-xl border border-border bg-card p-4">
         <div class="text-[10px] uppercase font-mono text-muted-foreground">Thermal Alerts</div>
-        <div class="font-serif text-2xl font-medium text-destructive mt-1">1</div>
-        <div class="text-[11px] text-muted-foreground mt-0.5">Session above 40°C</div>
+        <div
+          class="font-serif text-2xl font-medium text-foreground mt-1"
+          :class="realSessions.some((s) => s.isHot) ? 'text-destructive' : ''"
+        >
+          {{ realSessions.filter((s) => s.isHot).length }}
+        </div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">Sessions above 40°C</div>
       </div>
     </div>
 
@@ -226,35 +214,91 @@ const fallbackSessions: ChargeSession[] = [
     <div v-else class="space-y-4">
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Recorded Sessions (Click to view full forensics)
+          Charge & Discharge Log (Live Hardware Telemetry)
         </h2>
-        <span class="text-xs text-muted-foreground">
-          {{
-            realSessions.length > 0
-              ? `${realSessions.length} logged sessions`
-              : '3 baseline sessions'
-          }}
+        <span class="text-xs font-mono text-muted-foreground">
+          {{ realSessions.length + (activeSession ? 1 : 0) }} total sessions
         </span>
       </div>
 
-      <!-- Real Sessions from SQLite -->
+      <!-- Real Active Live Ongoing Session -->
+      <div
+        v-if="activeSession"
+        role="button"
+        tabindex="0"
+        class="rounded-xl border border-primary/50 bg-primary/5 p-5 transition hover:border-primary hover:bg-primary/10 cursor-pointer active:scale-[0.99] relative overflow-hidden group shadow-sm"
+        @click="openSession(activeSession)"
+        @keydown.enter="openSession(activeSession)"
+      >
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                class="inline-flex items-center gap-1.5 text-[10px] uppercase font-mono font-semibold px-2 py-0.5 rounded bg-primary text-primary-foreground tracking-wide"
+              >
+                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                Active Now · In Progress
+              </span>
+              <span class="text-sm font-semibold text-foreground">
+                {{ activeSession.isCharging ? 'Active Charge' : 'Battery Discharge' }} ({{
+                  activeSession.startPct
+                }}% → {{ activeSession.endPct }}%)
+              </span>
+              <span class="font-mono text-xs text-primary font-medium">
+                {{ activeSession.isCharging ? '+' : ''
+                }}{{ activeSession.endPct - activeSession.startPct }}%
+              </span>
+            </div>
+            <div class="text-xs font-mono text-muted-foreground mt-1.5">
+              Active for {{ activeSession.duration }} ·
+              {{ activeSession.cycleDelta || '+0.00' }} cycles ·
+              {{ activeSession.energyWh || '0.0 Wh' }}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-5 text-right">
+            <div>
+              <div class="font-mono text-[11px] text-muted-foreground">Live Draw</div>
+              <div class="font-mono font-medium text-foreground">{{ activeSession.avgWatts }}</div>
+            </div>
+            <div>
+              <div class="font-mono text-[11px] text-muted-foreground">Cell Temp</div>
+              <div
+                :class="[
+                  'font-mono font-medium',
+                  activeSession.isHot ? 'text-destructive font-semibold' : 'text-foreground',
+                ]"
+              >
+                {{ activeSession.peakTemp }}
+              </div>
+            </div>
+            <div
+              class="text-xs font-mono uppercase text-primary font-medium group-hover:translate-x-0.5 transition-transform hidden sm:block"
+            >
+              Inspect →
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real Completed Sessions from SQLite -->
       <template v-if="realSessions.length > 0">
         <div
           v-for="s in realSessions"
           :key="s.id"
           role="button"
           tabindex="0"
-          class="rounded-xl border border-border bg-card p-5 transition hover:border-primary/50 hover:bg-muted/30 cursor-pointer active:scale-[0.99]"
+          class="rounded-xl border border-border bg-card p-5 transition hover:border-primary/50 hover:bg-muted/30 cursor-pointer active:scale-[0.99] group"
           @click="openSession(s)"
           @keydown.enter="openSession(s)"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
               <div class="text-sm font-medium text-foreground flex items-center gap-2">
-                <span
-                  >{{ s.isCharging ? 'Charge Session' : 'Discharge Cycle' }} ({{ s.startPct }}% →
-                  {{ s.endPct }}%)</span
-                >
+                <span>
+                  {{ s.isCharging ? 'Charge Session' : 'Discharge Cycle' }} ({{ s.startPct }}% →
+                  {{ s.endPct }}%)
+                </span>
                 <span
                   v-if="s.isHot"
                   class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold"
@@ -271,76 +315,46 @@ const fallbackSessions: ChargeSession[] = [
                     minute: '2-digit',
                   })
                 }}
-                · {{ s.duration }}
+                · {{ s.duration }} · {{ s.cycleDelta || '+0.00' }} cycles
               </div>
             </div>
 
-            <div class="flex items-center gap-4 text-right">
+            <div class="flex items-center gap-5 text-right">
               <div>
-                <div class="font-mono text-xs text-muted-foreground">Avg Draw</div>
-                <div class="font-mono font-medium">{{ s.avgWatts }}</div>
+                <div class="font-mono text-[11px] text-muted-foreground">Avg Power</div>
+                <div class="font-mono font-medium text-foreground">{{ s.avgWatts }}</div>
               </div>
               <div>
-                <div class="font-mono text-xs text-muted-foreground">Peak Temp</div>
-                <div :class="['font-mono font-medium', s.isHot ? 'text-destructive' : '']">
-                  {{ s.peakTemp }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <!-- Initial Fallback if DB was just created -->
-      <template v-else>
-        <div
-          v-for="(s, idx) in fallbackSessions"
-          :key="idx"
-          role="button"
-          tabindex="0"
-          class="rounded-xl border border-border bg-card p-5 transition hover:border-primary/50 hover:bg-muted/30 cursor-pointer active:scale-[0.99]"
-          @click="openSession(s)"
-          @keydown.enter="openSession(s)"
-        >
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <div class="text-sm font-medium text-foreground flex items-center gap-2">
-                <span>Charge {{ s.startPct }}% → {{ s.endPct }}%</span>
-                <span
-                  v-if="s.isHot"
-                  class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold"
+                <div class="font-mono text-[11px] text-muted-foreground">Peak Temp</div>
+                <div
+                  :class="[
+                    'font-mono font-medium',
+                    s.isHot ? 'text-destructive' : 'text-foreground',
+                  ]"
                 >
-                  Hot
-                </span>
-              </div>
-              <div class="text-xs font-mono text-muted-foreground mt-0.5">
-                {{
-                  new Date(s.startTime).toLocaleDateString([], {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                }}
-                · {{ s.duration }}
-              </div>
-            </div>
-
-            <div class="flex items-center gap-4 text-right">
-              <div>
-                <div class="font-mono text-xs text-muted-foreground">Power</div>
-                <div class="font-mono font-medium">{{ s.avgWatts }}</div>
-              </div>
-              <div>
-                <div class="font-mono text-xs text-muted-foreground">Peak Temp</div>
-                <div :class="['font-mono font-medium', s.isHot ? 'text-destructive' : '']">
                   {{ s.peakTemp }}
                 </div>
+              </div>
+              <div
+                class="text-xs font-mono uppercase text-muted-foreground group-hover:text-primary transition-colors hidden sm:block"
+              >
+                Forensics →
               </div>
             </div>
           </div>
         </div>
       </template>
+
+      <!-- Empty State if no past sessions exist and no active session -->
+      <div
+        v-else-if="!activeSession"
+        class="rounded-xl border border-dashed border-border p-8 text-center"
+      >
+        <p class="text-sm text-muted-foreground">
+          No historical charge cycles recorded yet. Plug in your charger or use your battery to log
+          telemetry.
+        </p>
+      </div>
     </div>
 
     <!-- Forensic Session Details Sheet -->
