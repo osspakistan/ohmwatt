@@ -52,7 +52,9 @@
   --sidebar-ring: #b5b5b5;
 
   /* Typography Stacks (Original shadcn theme setup) */
-  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans:
+    'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
   --font-heading: var(--font-sans);
 
   /* Dimensions & Spacing */

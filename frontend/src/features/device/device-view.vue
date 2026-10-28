@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-import MaskedField from '@/components/common/masked-field.vue'
-import SegmentControl from '@/components/common/segment-control.vue'
-import { DeviceService } from '../../../bindings/changeme/service'
 import type { DeviceSpecs } from '../../../bindings/changeme/core/hardware'
 import type { AdapterInfo } from '../../../bindings/changeme/core/power'
+import { DeviceService } from '../../../bindings/changeme/service'
+
+import MaskedField from '@/components/common/masked-field.vue'
+import SegmentControl from '@/components/common/segment-control.vue'
 
 const activeTab = ref<'battery' | 'adapter' | 'laptop'>('battery')
 
@@ -124,7 +125,10 @@ onMounted(async () => {
       </div>
       <div class="flex items-center justify-between py-3">
         <span class="text-sm text-muted-foreground">Negotiated Wattage</span>
-        <span class="font-mono text-sm font-medium">{{ adapter.negotiatedWatts }} W ({{ adapter.voltageVolts }}V @ {{ adapter.amperes }}A)</span>
+        <span class="font-mono text-sm font-medium"
+          >{{ adapter.negotiatedWatts }} W ({{ adapter.voltageVolts }}V @
+          {{ adapter.amperes }}A)</span
+        >
       </div>
       <div class="flex items-center justify-between py-3">
         <span class="text-sm text-muted-foreground">Active Power Draw</span>
@@ -139,7 +143,9 @@ onMounted(async () => {
     >
       <div class="flex items-center justify-between py-3">
         <span class="text-sm text-muted-foreground">Laptop Model</span>
-        <span class="font-mono text-sm font-medium">{{ specs.laptopManufacturer }} {{ specs.laptopModel }}</span>
+        <span class="font-mono text-sm font-medium"
+          >{{ specs.laptopManufacturer }} {{ specs.laptopModel }}</span
+        >
       </div>
       <div class="flex items-center justify-between py-3">
         <span class="text-sm text-muted-foreground">System Serial Number</span>

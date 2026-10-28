@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+import type { Diagnostic } from '../../../bindings/changeme/core/hibernate'
+import { HibernateService } from '../../../bindings/changeme/service'
+
 import CommandBlock from '@/components/common/command-block.vue'
 import SegmentControl from '@/components/common/segment-control.vue'
-import { HibernateService } from '../../../bindings/changeme/service'
-import type { Diagnostic } from '../../../bindings/changeme/core/hibernate'
 
 const activeOS = ref<'linux' | 'windows' | 'macos'>('linux')
 
@@ -49,8 +50,8 @@ onMounted(async () => {
             System Configuration Notice
           </div>
           <p class="text-sm text-foreground/80 mt-1">
-            Hibernation writes active RAM contents directly to disk swap. Follow the verified commands
-            below to prevent boot-looping or lost sessions.
+            Hibernation writes active RAM contents directly to disk swap. Follow the verified
+            commands below to prevent boot-looping or lost sessions.
           </p>
         </div>
       </div>
@@ -94,7 +95,8 @@ onMounted(async () => {
       <div class="space-y-3">
         <div class="text-sm font-medium">1. Ensure Sufficient Swap Allocation</div>
         <p class="text-xs text-muted-foreground">
-          Allocate a swapfile that comfortably accommodates your {{ diag?.ramSizeGiB ?? 22 }} GiB RAM:
+          Allocate a swapfile that comfortably accommodates your {{ diag?.ramSizeGiB ?? 22 }} GiB
+          RAM:
         </p>
         <CommandBlock
           command="sudo fallocate -l 24G /swap.img && sudo chmod 600 /swap.img && sudo mkswap /swap.img && sudo swapon /swap.img"

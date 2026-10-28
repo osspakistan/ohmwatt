@@ -103,7 +103,9 @@ function isActive(path: string) {
 /* Navigating downward in the tab rail (toIndex > fromIndex) */
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: opacity 0.16s cubic-bezier(0.2, 0, 0, 1), transform 0.16s cubic-bezier(0.2, 0, 0, 1);
+  transition:
+    opacity 0.16s cubic-bezier(0.2, 0, 0, 1),
+    transform 0.16s cubic-bezier(0.2, 0, 0, 1);
   will-change: opacity, transform;
 }
 
@@ -120,7 +122,9 @@ function isActive(path: string) {
 /* Navigating upward in the tab rail (toIndex < fromIndex) */
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: opacity 0.16s cubic-bezier(0.2, 0, 0, 1), transform 0.16s cubic-bezier(0.2, 0, 0, 1);
+  transition:
+    opacity 0.16s cubic-bezier(0.2, 0, 0, 1),
+    transform 0.16s cubic-bezier(0.2, 0, 0, 1);
   will-change: opacity, transform;
 }
 

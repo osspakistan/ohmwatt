@@ -1,14 +1,14 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import AppLayout from '@/layouts/app-layout.vue'
-import DashboardView from '@/features/dashboard/dashboard-view.vue'
-import HealthView from '@/features/health/health-view.vue'
-import HistoryView from '@/features/history/history-view.vue'
-import DeviceView from '@/features/device/device-view.vue'
 import AlertsView from '@/features/alerts/alerts-view.vue'
+import DashboardView from '@/features/dashboard/dashboard-view.vue'
+import DeviceView from '@/features/device/device-view.vue'
+import HealthView from '@/features/health/health-view.vue'
 import HibernateView from '@/features/hibernate/hibernate-view.vue'
+import HistoryView from '@/features/history/history-view.vue'
 import ReportsView from '@/features/reports/reports-view.vue'
 import SettingsView from '@/features/settings/settings-view.vue'
+import AppLayout from '@/layouts/app-layout.vue'
 
 export const router = createRouter({
   history: createWebHashHistory(),

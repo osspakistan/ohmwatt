@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import LiquidVessel from './components/liquid-vessel.vue'
+
 import StatusPill from '@/components/common/status-pill.vue'
 import { useBattery } from '@/composables/use-battery'
 
@@ -15,9 +16,15 @@ const isCharging = computed(() => battery.value.isCharging)
 const headsUpThreshold = ref(90)
 const batteryCount = ref(1) // Toggle 1 or 2
 const voltage = computed(() => `${battery.value.voltageVolts} V`)
-const current = computed(() => `${(battery.value.powerWatts / (battery.value.voltageVolts || 1)).toFixed(2)} A`)
+const current = computed(
+  () => `${(battery.value.powerWatts / (battery.value.voltageVolts || 1)).toFixed(2)} A`,
+)
 const temperature = computed(() => `${battery.value.temperatureC} °C`)
-const chargerWattage = computed(() => battery.value.isAcConnected ? `${battery.value.powerWatts > 0 ? battery.value.powerWatts : 65} W` : 'Disconnected')
+const chargerWattage = computed(() =>
+  battery.value.isAcConnected
+    ? `${battery.value.powerWatts > 0 ? battery.value.powerWatts : 65} W`
+    : 'Disconnected',
+)
 const isUnderpowered = ref(false)
 
 const sentence = computed(() => {

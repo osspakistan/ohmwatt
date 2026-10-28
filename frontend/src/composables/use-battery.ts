@@ -1,30 +1,31 @@
-import { ref, onMounted, onUnmounted } from "vue";
-import { BatteryService } from "../../bindings/changeme/service";
-import type { State } from "../../bindings/changeme/core/battery";
-import { Events } from "@wailsio/runtime";
+import { Events } from '@wailsio/runtime'
+import { ref, onMounted, onUnmounted } from 'vue'
+
+import type { State } from '../../bindings/changeme/core/battery'
+import { BatteryService } from '../../bindings/changeme/service'
 
 export interface BatteryTelemetry {
-  percentage: number;
-  status: string;
-  isCharging: boolean;
-  isAcConnected: boolean;
-  powerWatts: number;
-  voltageVolts: number;
-  currentAmperes: number;
-  healthPercentage: number;
-  cycleCount: number;
-  designCapacity: number;
-  currentCapacity: number;
-  fullCapacity: number;
-  temperatureC: number;
-  timeToEmptyMins: number;
-  timeToFullMins: number;
-  lastUpdated: string;
+  percentage: number
+  status: string
+  isCharging: boolean
+  isAcConnected: boolean
+  powerWatts: number
+  voltageVolts: number
+  currentAmperes: number
+  healthPercentage: number
+  cycleCount: number
+  designCapacity: number
+  currentCapacity: number
+  fullCapacity: number
+  temperatureC: number
+  timeToEmptyMins: number
+  timeToFullMins: number
+  lastUpdated: string
 }
 
 const battery = ref<BatteryTelemetry>({
   percentage: 88,
-  status: "Discharging",
+  status: 'Discharging',
   isCharging: false,
   isAcConnected: false,
   powerWatts: 14.2,
@@ -38,19 +39,19 @@ const battery = ref<BatteryTelemetry>({
   temperatureC: 29.5,
   timeToEmptyMins: 210,
   timeToFullMins: 0,
-  lastUpdated: "Just now",
-});
+  lastUpdated: 'Just now',
+})
 
-const isConnected = ref(true);
+const isConnected = ref(true)
 
 export function useBattery() {
   async function refresh() {
     try {
-      const state: State | null = await BatteryService.GetBatteryState();
+      const state: State | null = await BatteryService.GetBatteryState()
       if (state) {
         battery.value = {
           percentage: state.percentage ?? 88,
-          status: state.status ?? "Discharging",
+          status: state.status ?? 'Discharging',
           isCharging: state.isCharging ?? false,
           isAcConnected: state.isAcConnected ?? false,
           powerWatts: Number((state.powerWatts ?? 0).toFixed(1)),
@@ -64,22 +65,26 @@ export function useBattery() {
           temperatureC: Number((state.temperatureC ?? 29.5).toFixed(1)),
           timeToEmptyMins: state.timeToEmptyMins ?? 0,
           timeToFullMins: state.timeToFullMins ?? 0,
-          lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        };
+          lastUpdated: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+        }
       }
     } catch (err) {
-      console.warn("useBattery query warning:", err);
+      console.warn('useBattery query warning:', err)
     }
   }
 
-  let unlisten: (() => void) | null = null;
+  let unlisten: (() => void) | null = null
 
   onMounted(async () => {
-    await refresh();
+    await refresh()
     try {
-      unlisten = Events.On("battery:updated", (event: any) => {
+      unlisten = Events.On('battery:updated', (event: { data: State | null }) => {
         if (event && event.data) {
-          const s = event.data;
+          const s = event.data
           battery.value = {
             ...battery.value,
             percentage: s.percentage ?? battery.value.percentage,
@@ -90,20 +95,24 @@ export function useBattery() {
             voltageVolts: Number((s.voltageVolts ?? battery.value.voltageVolts).toFixed(2)),
             healthPercentage: s.healthPercentage ?? battery.value.healthPercentage,
             cycleCount: s.cycleCount ?? battery.value.cycleCount,
-            lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          };
+            lastUpdated: new Date().toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            }),
+          }
         }
-      });
-    } catch (e) {
+      })
+    } catch {
       // preview environment
     }
-  });
+  })
 
   onUnmounted(() => {
     if (unlisten) {
-      unlisten();
+      unlisten()
     }
-  });
+  })
 
   return {
     battery,
@@ -111,5 +120,5 @@ export function useBattery() {
     refresh,
     getHealth: BatteryService.GetBatteryHealth,
     setChargeCeiling: BatteryService.SetChargeCeiling,
-  };
+  }
 }
