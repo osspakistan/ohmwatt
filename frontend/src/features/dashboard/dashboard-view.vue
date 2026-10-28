@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { DeviceService } from '../../../bindings/changeme/service'
 
 import LiquidVessel from './components/liquid-vessel.vue'
 
@@ -26,6 +28,25 @@ const chargerWattage = computed(() =>
     : 'Disconnected',
 )
 const isUnderpowered = ref(false)
+
+const deviceLabel = ref('HP EliteBook 850 G7')
+const batteryLabel = ref('SMP battery')
+
+onMounted(async () => {
+  try {
+    const s = await DeviceService.GetDeviceSpecs()
+    if (s) {
+      if (s.laptopModel) {
+        deviceLabel.value = s.laptopModel.replace(/ Notebook PC$/i, '')
+      }
+      if (s.batteryManufacturer) {
+        batteryLabel.value = `${s.batteryManufacturer} battery`
+      }
+    }
+  } catch (err) {
+    console.debug('Failed to query device specs on dashboard:', err)
+  }
+})
 
 const sentence = computed(() => {
   if (isCharging.value) {
@@ -57,7 +78,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
 <template>
   <div class="max-w-4xl mx-auto px-6 sm:px-10 py-8">
     <div class="grid md:grid-cols-[250px_1fr] gap-10 items-start">
-      <!-- Left Hero: Animated Liquid Vessel -->
+      <!-- Left Column: Animated Liquid Vessel + Quick Navigation Links -->
       <div class="flex flex-col items-center">
         <!-- Single or Dual Vessel -->
         <div v-if="batteryCount === 2" class="grid grid-cols-2 gap-3">
@@ -86,14 +107,60 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
         <!-- Multi-Battery Toggle (Lenovo T480 / dual battery style) -->
         <button
           type="button"
-          class="mt-4 text-xs font-mono text-muted-foreground/70 hover:text-foreground transition underline underline-offset-4"
+          class="mt-3 text-xs font-mono text-muted-foreground/60 hover:text-foreground transition underline underline-offset-4 cursor-pointer"
           @click="batteryCount = batteryCount === 1 ? 2 : 1"
         >
           {{ batteryCount === 1 ? 'Show dual battery (mock)' : 'Single battery mode' }}
         </button>
+
+        <!-- Quick Jump Links (Under battery vessel) -->
+        <div class="w-full mt-6 space-y-3 border-t border-border pt-4">
+          <button
+            type="button"
+            class="w-full text-left py-2 hover:opacity-80 transition group cursor-pointer block"
+            @click="router.push('/health')"
+          >
+            <div class="flex items-baseline justify-between">
+              <span class="font-serif text-2xl font-medium text-foreground leading-none">
+                {{ battery.healthPercentage }}%
+              </span>
+              <span
+                class="text-[10px] uppercase font-mono tracking-wider text-muted-foreground group-hover:text-primary transition"
+              >
+                View Health →
+              </span>
+            </div>
+            <p class="text-xs text-muted-foreground mt-1.5 leading-snug">
+              of original capacity · {{ battery.cycleCount }} cycles
+            </p>
+          </button>
+
+          <button
+            type="button"
+            class="w-full text-left py-2 border-t border-border/60 pt-3 hover:opacity-80 transition group cursor-pointer block"
+            @click="router.push('/device')"
+          >
+            <div class="flex items-baseline justify-between">
+              <span
+                class="text-xs font-medium text-foreground truncate max-w-[130px]"
+                :title="deviceLabel"
+              >
+                {{ deviceLabel }}
+              </span>
+              <span
+                class="text-[10px] uppercase font-mono tracking-wider text-muted-foreground group-hover:text-primary transition shrink-0"
+              >
+                Device Specs →
+              </span>
+            </div>
+            <p class="text-[11px] text-muted-foreground font-mono mt-1">
+              {{ batteryLabel }}
+            </p>
+          </button>
+        </div>
       </div>
 
-      <!-- Right Panel: Diagnostics, Hour Strip, and Quick Links -->
+      <!-- Right Panel: Diagnostics, Metric Tiles, and Hour Strip -->
       <div class="space-y-6">
         <!-- Top Status Pill & Dynamic Sentence -->
         <div>
@@ -230,40 +297,6 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
               Charging
             </span>
           </div>
-        </div>
-
-        <!-- Quick Jump Links to Health & Device -->
-        <div class="mt-8 space-y-2 border-t border-border pt-4">
-          <button
-            type="button"
-            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group cursor-pointer"
-            @click="router.push('/health')"
-          >
-            <div>
-              <span class="font-serif text-2xl font-medium">{{ battery.healthPercentage }}%</span>
-              <span class="text-sm text-muted-foreground ml-2"
-                >of original capacity · {{ battery.cycleCount }} cycles</span
-              >
-            </div>
-            <span
-              class="text-xs uppercase font-mono tracking-wider text-muted-foreground group-hover:text-primary"
-            >
-              View Health →
-            </span>
-          </button>
-
-          <button
-            type="button"
-            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group border-t border-border/60 pt-3 cursor-pointer"
-            @click="router.push('/device')"
-          >
-            <span class="text-sm text-muted-foreground"> HP EliteBook 850 G7 · SMP battery </span>
-            <span
-              class="text-xs uppercase font-mono tracking-wider text-muted-foreground group-hover:text-primary"
-            >
-              Device Specs →
-            </span>
-          </button>
         </div>
       </div>
     </div>
