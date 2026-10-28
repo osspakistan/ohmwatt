@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
+import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -18,11 +18,5 @@ import * as hibernate$0 from "../core/hibernate/models.js";
  * GetDiagnostic returns the hibernation readiness analysis and checklist.
  */
 export function GetDiagnostic(): $CancellablePromise<hibernate$0.Diagnostic | null> {
-    return $Call.ByID(3149147307).then(($result: any) => {
-        return $$createType1($result);
-    });
+    return $Call.ByID(3149147307);
 }
-
-// Private type creation functions
-const $$createType0 = hibernate$0.Diagnostic.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);

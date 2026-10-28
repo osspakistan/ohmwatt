@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
+import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -18,27 +18,21 @@ import * as store$0 from "../core/store/models.js";
  * GetActiveSession returns the live session currently underway.
  */
 export function GetActiveSession(): $CancellablePromise<store$0.ChargeSession | null> {
-    return $Call.ByID(3274063684).then(($result: any) => {
-        return $$createType1($result);
-    });
+    return $Call.ByID(3274063684);
 }
 
 /**
  * GetDailySnapshots returns daily snapshots for health degradation charts.
  */
-export function GetDailySnapshots(days: number): $CancellablePromise<store$0.DailySnapshot[]> {
-    return $Call.ByID(2886994904, days).then(($result: any) => {
-        return $$createType3($result);
-    });
+export function GetDailySnapshots(days: number): $CancellablePromise<store$0.DailySnapshot[] | null> {
+    return $Call.ByID(2886994904, days);
 }
 
 /**
  * GetRecentSessions returns chronological charge/discharge sessions from SQLite.
  */
-export function GetRecentSessions(): $CancellablePromise<store$0.ChargeSession[]> {
-    return $Call.ByID(1223190956).then(($result: any) => {
-        return $$createType4($result);
-    });
+export function GetRecentSessions(): $CancellablePromise<store$0.ChargeSession[] | null> {
+    return $Call.ByID(1223190956);
 }
 
 /**
@@ -47,10 +41,3 @@ export function GetRecentSessions(): $CancellablePromise<store$0.ChargeSession[]
 export function SetActiveSession(session: store$0.ChargeSession | null): $CancellablePromise<void> {
     return $Call.ByID(1952557024, session);
 }
-
-// Private type creation functions
-const $$createType0 = store$0.ChargeSession.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-const $$createType2 = store$0.DailySnapshot.createFrom;
-const $$createType3 = $Create.Array($$createType2);
-const $$createType4 = $Create.Array($$createType0);

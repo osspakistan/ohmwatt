@@ -6,18 +6,4 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as battery$0 from "../../../../../changeme/core/battery/models.js";
-
-function configure() {
-    Object.freeze(Object.assign($Create.Events, {
-        "battery:updated": $$createType1,
-    }));
-}
-
-// Private type creation functions
-const $$createType0 = battery$0.State.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-
-configure();
+Object.freeze($Create.Events);

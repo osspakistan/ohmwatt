@@ -15,7 +15,7 @@ No synthetic math. No cloud tracking. 100% direct kernel telemetry.
 [![Zero Telemetry](https://img.shields.io/badge/Privacy-100%25_Offline-success?style=flat-square)](#privacy--offline-guarantee)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-[Visual Showcase](#visual-showcase) • [Problem & Solution](#problem--solution) • [Status Matrix](#honest-status-matrix-what-works-vs-what-does-not) • [Tech Stack](#technology-stack) • [Project Tree](#project-structure) • [Building](#building-from-source) • [Roadmap](#future-roadmap)
+[Visual Showcase](#visual-showcase) • [Problem & Solution](#problem--solution) • [Status Matrix](#honest-status-matrix-what-works-vs-what-does-not) • [Tech Stack](#technology-stack) • [Project Tree](#project-structure) • [Running & Building](#running--building-with-wails) • [Roadmap](#future-roadmap)
 
 </div>
 
@@ -250,14 +250,18 @@ antlion-app/
 
 ---
 
-## Building from Source
+## Running & Building with Wails
 
-Because automated distribution packages (`.deb`, `.AppImage`) are not yet published, you must build Antlion locally from source:
+Antlion is built on [Wails v3](https://v3.wails.io). Use the official `wails3` CLI commands to develop, build, and package the application:
 
 ### 1. Prerequisites
 
 - **Linux**: Kernel 5.4+ (Ubuntu 22.04+, Debian 12+, Fedora 38+, Arch Linux)
 - **Go**: 1.23 or newer (`go version`)
+- **Wails v3 CLI**: Install or update the CLI:
+  ```bash
+  go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+  ```
 - **Bun** (recommended) or **Node.js 20+**: (`bun --version` or `node -v`)
 - **WebKitGTK Development Headers**:
   - Debian / Ubuntu:
@@ -274,11 +278,12 @@ Because automated distribution packages (`.deb`, `.AppImage`) are not yet publis
     sudo pacman -S webkit2gtk-4.1 gtk3
     ```
 
-### 2. Clone the Repository
+### 2. Verify Environment
+
+Run Wails doctor to check toolchain dependencies:
 
 ```bash
-git clone https://github.com/your-org/antlion.git
-cd antlion/antlion-app
+wails3 doctor
 ```
 
 ### 3. Install Frontend Dependencies
@@ -289,9 +294,33 @@ bun install
 cd ..
 ```
 
-### 4. Run Quality Verification
+### 4. Run in Development Mode
 
-Verify that all linters, formatting, and TypeScript compilation pass cleanly:
+Start the application with live hot-reloading for both Go backend services and Vue 3 frontend:
+
+```bash
+wails3 dev
+```
+
+### 5. Build Production Executable
+
+Compile the production desktop binary. This automatically regenerates TypeScript bindings, builds the Vite production bundle, and outputs the native executable to `bin/antlion-app`:
+
+```bash
+wails3 build
+```
+
+### 6. Run the Built Binary
+
+```bash
+./bin/antlion-app
+```
+
+*(or via Wails task runner: `wails3 task run`)*
+
+### 7. Run Quality Gates
+
+Verify linters, formatting, and TypeScript compilation:
 
 ```bash
 cd frontend
@@ -300,20 +329,6 @@ cd ..
 ```
 
 *(This runs `oxfmt`, `oxlint`, `eslint`, and `vue-tsc --noEmit`)*.
-
-### 5. Build the Executable
-
-Compile the standalone native binary:
-
-```bash
-go build -o bin/antlion .
-```
-
-### 6. Run Antlion
-
-```bash
-./bin/antlion
-```
 
 ---
 
@@ -340,7 +355,7 @@ Antlion is an engineering telemetry monitor. **Never hardcode fake numbers**, mo
 ### 2. Strict Quality Gates
 Before submitting any pull request, ensure:
 1. `cd frontend && bun run check` passes with **0 warnings and 0 errors**.
-2. `go build -o bin/antlion .` compiles cleanly with **0 errors**.
+2. `wails3 build` compiles cleanly with **0 errors**.
 
 ### 3. Git Commit Convention
 The repository enforces atomic, conventional commits:

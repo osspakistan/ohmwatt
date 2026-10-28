@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
+import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -21,22 +21,12 @@ import * as power$0 from "../core/power/models.js";
  * GetAdapterInfo returns AC adapter details and negotiated wattage.
  */
 export function GetAdapterInfo(): $CancellablePromise<power$0.AdapterInfo | null> {
-    return $Call.ByID(783711065).then(($result: any) => {
-        return $$createType1($result);
-    });
+    return $Call.ByID(783711065);
 }
 
 /**
  * GetDeviceSpecs returns static hardware identity for battery, laptop, and BIOS.
  */
 export function GetDeviceSpecs(): $CancellablePromise<hardware$0.DeviceSpecs | null> {
-    return $Call.ByID(2409382988).then(($result: any) => {
-        return $$createType3($result);
-    });
+    return $Call.ByID(2409382988);
 }
-
-// Private type creation functions
-const $$createType0 = power$0.AdapterInfo.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-const $$createType2 = hardware$0.DeviceSpecs.createFrom;
-const $$createType3 = $Create.Nullable($$createType2);

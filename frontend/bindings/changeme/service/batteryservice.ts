@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
+import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -25,18 +25,14 @@ export function GetBatteryCount(): $CancellablePromise<number> {
  * GetBatteryHealth returns capacity retention, cycle count, and grade.
  */
 export function GetBatteryHealth(): $CancellablePromise<battery$0.Health | null> {
-    return $Call.ByID(3906833268).then(($result: any) => {
-        return $$createType1($result);
-    });
+    return $Call.ByID(3906833268);
 }
 
 /**
  * GetBatteryState returns the live telemetry state.
  */
 export function GetBatteryState(): $CancellablePromise<battery$0.State | null> {
-    return $Call.ByID(4274916539).then(($result: any) => {
-        return $$createType3($result);
-    });
+    return $Call.ByID(4274916539);
 }
 
 /**
@@ -45,9 +41,3 @@ export function GetBatteryState(): $CancellablePromise<battery$0.State | null> {
 export function SetChargeCeiling(ceiling: number): $CancellablePromise<[boolean, string]> {
     return $Call.ByID(1416003528, ceiling);
 }
-
-// Private type creation functions
-const $$createType0 = battery$0.Health.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-const $$createType2 = battery$0.State.createFrom;
-const $$createType3 = $Create.Nullable($$createType2);
