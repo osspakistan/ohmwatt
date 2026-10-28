@@ -4,7 +4,12 @@ import { ref, onMounted } from 'vue'
 import type { ChargeSession, DailySnapshot } from '../../../bindings/changeme/core/store'
 import { HistoryService } from '../../../bindings/changeme/service'
 
+import SessionDetailSheet from './components/session-detail-sheet.vue'
+
 import SegmentControl from '@/components/common/segment-control.vue'
+import { useBattery } from '@/composables/use-battery'
+
+const { battery } = useBattery()
 
 const activeTab = ref<'trends' | 'sessions'>('trends')
 const trendRange = ref<'24h' | '10d'>('24h')
@@ -21,6 +26,13 @@ const rangeOptions = [
 
 const realSessions = ref<ChargeSession[]>([])
 const dailySnapshots = ref<DailySnapshot[]>([])
+const selectedSession = ref<ChargeSession | null>(null)
+const sheetOpen = ref(false)
+
+function openSession(s: ChargeSession) {
+  selectedSession.value = s
+  sheetOpen.value = true
+}
 
 async function loadHistory() {
   try {
@@ -42,41 +54,41 @@ onMounted(() => {
 })
 
 // Baseline fallback sessions if DB was freshly initialized today
-const fallbackSessions = [
+const fallbackSessions: ChargeSession[] = [
   {
     id: 's1',
-    date: 'Today, 2:14 PM',
+    startTime: new Date(Date.now() - 48 * 60000).toISOString(),
+    endTime: new Date().toISOString(),
     duration: '48m',
     startPct: 22,
     endPct: 78,
     avgWatts: '26.4 W',
-    peakTemp: '36 °C',
-    charger: '65 W USB-PD',
-    hot: false,
+    peakTemp: '36.2 °C',
+    isHot: false,
     isCharging: true,
   },
   {
     id: 's2',
-    date: 'Yesterday, 8:30 PM',
+    startTime: new Date(Date.now() - 86400000).toISOString(),
+    endTime: new Date(Date.now() - 86400000 + 72 * 60000).toISOString(),
     duration: '1h 12m',
     startPct: 15,
     endPct: 90,
     avgWatts: '31.2 W',
-    peakTemp: '42 °C',
-    charger: '90 W OEM',
-    hot: true,
+    peakTemp: '42.0 °C',
+    isHot: true,
     isCharging: true,
   },
   {
     id: 's3',
-    date: 'Oct 25, 11:05 AM',
+    startTime: new Date(Date.now() - 172800000).toISOString(),
+    endTime: new Date(Date.now() - 172800000 + 35 * 60000).toISOString(),
     duration: '35m',
     startPct: 40,
     endPct: 75,
     avgWatts: '24.1 W',
-    peakTemp: '33 °C',
-    charger: '65 W USB-PD',
-    hot: false,
+    peakTemp: '33.0 °C',
+    isHot: false,
     isCharging: true,
   },
 ]
@@ -84,7 +96,7 @@ const fallbackSessions = [
 
 <template>
   <div class="max-w-3xl mx-auto px-6 sm:px-10 py-9">
-    <header class="mb-8 flex items-center justify-between flex-wrap gap-4">
+    <header class="mb-6 flex items-center justify-between flex-wrap gap-4">
       <div>
         <h1 class="font-serif text-4xl tracking-tight text-foreground">History</h1>
         <p class="text-muted-foreground mt-1.5">
@@ -93,6 +105,34 @@ const fallbackSessions = [
       </div>
       <SegmentControl v-model="activeTab" :options="tabOptions" />
     </header>
+
+    <!-- Top Prominent Cycle KPI Strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div class="rounded-xl border border-border bg-card p-4">
+        <div class="text-[10px] uppercase font-mono text-muted-foreground">Lifetime Cycles</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">
+          {{ battery.cycleCount }}
+        </div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">Hardware counter</div>
+      </div>
+      <div class="rounded-xl border border-border bg-card p-4">
+        <div class="text-[10px] uppercase font-mono text-muted-foreground">Logged Sessions</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">
+          {{ realSessions.length > 0 ? realSessions.length : fallbackSessions.length }}
+        </div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">In local database</div>
+      </div>
+      <div class="rounded-xl border border-border bg-card p-4">
+        <div class="text-[10px] uppercase font-mono text-muted-foreground">Avg Duration</div>
+        <div class="font-serif text-2xl font-medium text-foreground mt-1">48m</div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">Per charge cycle</div>
+      </div>
+      <div class="rounded-xl border border-border bg-card p-4">
+        <div class="text-[10px] uppercase font-mono text-muted-foreground">Thermal Alerts</div>
+        <div class="font-serif text-2xl font-medium text-destructive mt-1">1</div>
+        <div class="text-[11px] text-muted-foreground mt-0.5">Session above 40°C</div>
+      </div>
+    </div>
 
     <!-- Trends Chart View (F04, F19) -->
     <div v-if="activeTab === 'trends'" class="space-y-6">
@@ -186,7 +226,7 @@ const fallbackSessions = [
     <div v-else class="space-y-4">
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Recorded Sessions (SQLite Persistence)
+          Recorded Sessions (Click to view full forensics)
         </h2>
         <span class="text-xs text-muted-foreground">
           {{
@@ -202,13 +242,25 @@ const fallbackSessions = [
         <div
           v-for="s in realSessions"
           :key="s.id"
-          class="rounded-xl border border-border bg-card p-5 transition hover:border-border/80"
+          role="button"
+          tabindex="0"
+          class="rounded-xl border border-border bg-card p-5 transition hover:border-primary/50 hover:bg-muted/30 cursor-pointer active:scale-[0.99]"
+          @click="openSession(s)"
+          @keydown.enter="openSession(s)"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <div class="text-sm font-medium text-foreground">
-                {{ s.isCharging ? 'Charge Session' : 'Discharge Cycle' }} ({{ s.startPct }}% →
-                {{ s.endPct }}%)
+              <div class="text-sm font-medium text-foreground flex items-center gap-2">
+                <span
+                  >{{ s.isCharging ? 'Charge Session' : 'Discharge Cycle' }} ({{ s.startPct }}% →
+                  {{ s.endPct }}%)</span
+                >
+                <span
+                  v-if="s.isHot"
+                  class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold"
+                >
+                  Hot
+                </span>
               </div>
               <div class="text-xs font-mono text-muted-foreground mt-0.5">
                 {{
@@ -244,15 +296,33 @@ const fallbackSessions = [
         <div
           v-for="(s, idx) in fallbackSessions"
           :key="idx"
-          class="rounded-xl border border-border bg-card p-5 transition hover:border-border/80"
+          role="button"
+          tabindex="0"
+          class="rounded-xl border border-border bg-card p-5 transition hover:border-primary/50 hover:bg-muted/30 cursor-pointer active:scale-[0.99]"
+          @click="openSession(s)"
+          @keydown.enter="openSession(s)"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <div class="text-sm font-medium text-foreground">
-                Charge {{ s.startPct }}% → {{ s.endPct }}%
+              <div class="text-sm font-medium text-foreground flex items-center gap-2">
+                <span>Charge {{ s.startPct }}% → {{ s.endPct }}%</span>
+                <span
+                  v-if="s.isHot"
+                  class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold"
+                >
+                  Hot
+                </span>
               </div>
               <div class="text-xs font-mono text-muted-foreground mt-0.5">
-                {{ s.date }} · {{ s.duration }}
+                {{
+                  new Date(s.startTime).toLocaleDateString([], {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                }}
+                · {{ s.duration }}
               </div>
             </div>
 
@@ -263,7 +333,7 @@ const fallbackSessions = [
               </div>
               <div>
                 <div class="font-mono text-xs text-muted-foreground">Peak Temp</div>
-                <div :class="['font-mono font-medium', s.hot ? 'text-destructive' : '']">
+                <div :class="['font-mono font-medium', s.isHot ? 'text-destructive' : '']">
                   {{ s.peakTemp }}
                 </div>
               </div>
@@ -272,5 +342,8 @@ const fallbackSessions = [
         </div>
       </template>
     </div>
+
+    <!-- Forensic Session Details Sheet -->
+    <SessionDetailSheet v-model:open="sheetOpen" :session="selectedSession" />
   </div>
 </template>

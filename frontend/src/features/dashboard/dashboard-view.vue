@@ -65,16 +65,15 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
             :percentage="percentage"
             :heads-up-threshold="headsUpThreshold"
             :is-charging="isCharging"
-            :small="true"
+            small
             battery-label="Internal"
-            id="v1"
           />
           <LiquidVessel
             :percentage="64"
-            :is-charging="isCharging"
-            :small="true"
+            :heads-up-threshold="headsUpThreshold"
+            :is-charging="false"
+            small
             battery-label="Removable"
-            id="v2"
           />
         </div>
         <LiquidVessel
@@ -82,87 +81,137 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
           :percentage="percentage"
           :heads-up-threshold="headsUpThreshold"
           :is-charging="isCharging"
-          id="main"
         />
+
+        <!-- Multi-Battery Toggle (Lenovo T480 / dual battery style) -->
+        <button
+          type="button"
+          class="mt-4 text-xs font-mono text-muted-foreground/70 hover:text-foreground transition underline underline-offset-4"
+          @click="batteryCount = batteryCount === 1 ? 2 : 1"
+        >
+          {{ batteryCount === 1 ? 'Show dual battery (mock)' : 'Single battery mode' }}
+        </button>
       </div>
 
-      <!-- Right Details & Live Telemetry -->
-      <div class="pt-2">
-        <StatusPill :status="isCharging ? 'charging' : 'battery'" />
+      <!-- Right Panel: Diagnostics, Hour Strip, and Quick Links -->
+      <div class="space-y-6">
+        <!-- Top Status Pill & Dynamic Sentence -->
+        <div>
+          <StatusPill
+            :status="isCharging ? (percentage >= 100 ? 'full' : 'charging') : 'battery'"
+          />
 
-        <!-- Big Lora Serif Number Readout -->
-        <div class="flex items-baseline gap-2 mt-4">
-          <span class="font-serif text-8xl font-light leading-none tracking-tight text-foreground">
-            {{ percentage }}
-          </span>
-          <span class="font-serif text-4xl text-muted-foreground">%</span>
+          <!-- Big Serif Percentage -->
+          <div class="flex items-baseline gap-2 mt-3">
+            <span
+              class="font-serif text-8xl font-light leading-none tracking-tight text-foreground"
+            >
+              {{ percentage }}
+            </span>
+            <span class="font-serif text-4xl text-muted-foreground">%</span>
+          </div>
+
+          <p class="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {{ sentence }}
+          </p>
         </div>
 
-        <p class="text-base sm:text-lg mt-3 text-muted-foreground max-w-md">
-          {{ sentence }}
-        </p>
-
-        <!-- 4-Grid Telemetry Strip -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-5 gap-x-4 mt-8">
-          <div class="border-l border-border pl-3">
-            <div class="text-xs text-muted-foreground uppercase tracking-wider">Voltage</div>
+        <!-- 4-Column Live Metric Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+          <div class="rounded-xl border border-border bg-card p-3">
+            <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Voltage
+            </div>
             <div class="font-mono text-lg font-medium text-foreground mt-0.5">{{ voltage }}</div>
           </div>
-          <div class="border-l border-border pl-3">
-            <div class="text-xs text-muted-foreground uppercase tracking-wider">Current</div>
+          <div class="rounded-xl border border-border bg-card p-3">
+            <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Current
+            </div>
             <div class="font-mono text-lg font-medium text-foreground mt-0.5">{{ current }}</div>
           </div>
-          <div class="border-l border-border pl-3">
-            <div class="text-xs text-muted-foreground uppercase tracking-wider">Temperature</div>
+          <div class="rounded-xl border border-border bg-card p-3">
+            <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Temperature
+            </div>
             <div class="font-mono text-lg font-medium text-foreground mt-0.5">
               {{ temperature }}
             </div>
           </div>
-          <div class="border-l border-border pl-3">
-            <div class="text-xs text-muted-foreground uppercase tracking-wider">Charger</div>
+          <div class="rounded-xl border border-border bg-card p-3">
+            <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Charger
+            </div>
             <div class="font-mono text-lg font-medium text-foreground mt-0.5">
               {{ chargerWattage }}
             </div>
           </div>
         </div>
 
-        <!-- Underpowered Charger Warning Hint -->
+        <!-- Underpowered Warning Chip -->
         <div
           v-if="isUnderpowered && isCharging"
-          class="mt-4 rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive flex items-center gap-2"
+          class="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive flex items-center gap-2"
         >
           <span>⚠</span>
           <span
-            >Your charger is 65 W and this laptop is rated for 90 W. Charging may be slow under
+            >Slow charge: 65 W adapter detected on a 90 W laptop. Battery may discharge under heavy
             load.</span
           >
         </div>
 
-        <!-- Hour-by-Hour Battery Distribution Strip -->
-        <div class="mt-8 border-t border-border pt-6">
-          <h2 class="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-3">
-            Today, hour by hour
-          </h2>
+        <!-- Prominent Cycle Odometer & Health Banner -->
+        <div
+          role="button"
+          tabindex="0"
+          class="rounded-xl border border-border bg-card p-4 transition hover:border-primary/50 hover:bg-muted/20 cursor-pointer active:scale-[0.99] flex items-center justify-between flex-wrap gap-3"
+          @click="router.push('/history')"
+          @keydown.enter="router.push('/history')"
+        >
+          <div class="space-y-0.5">
+            <div class="text-[10px] uppercase font-mono tracking-wider text-muted-foreground">
+              Battery Lifetime Odometer
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="font-serif text-2xl font-medium text-foreground">{{
+                battery.cycleCount
+              }}</span>
+              <span class="text-xs text-muted-foreground font-mono">cycles completed</span>
+              <span class="text-xs text-primary font-medium ml-1"
+                >· {{ battery.healthPercentage }}% Health (Grade A)</span
+              >
+            </div>
+          </div>
           <div
-            class="flex items-end gap-[2px] h-16 w-full"
-            role="img"
-            aria-label="Battery level over the last 24 hours"
+            class="text-xs uppercase font-mono tracking-wider text-muted-foreground hover:text-primary flex items-center gap-1"
           >
+            <span>Cycle Ledger</span>
+            <span>→</span>
+          </div>
+        </div>
+
+        <!-- Hour-by-Hour 24h Bar Strip (F01, F22) -->
+        <div class="rounded-xl border border-border bg-card p-4 pt-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Today, hour by hour
+            </h2>
+            <span class="text-[11px] font-mono text-muted-foreground">48 slots (30m each)</span>
+          </div>
+
+          <!-- 48-slot timeline bar chart -->
+          <div class="flex items-end gap-1 h-16 pt-2">
             <div
-              v-for="(slot, idx) in hourSlots"
-              :key="idx"
-              :class="[
-                'flex-1 rounded-sm transition-all',
-                slot.charging ? 'bg-primary' : 'bg-muted-foreground',
-              ]"
-              :style="{
-                height: `${slot.height}%`,
-                opacity: slot.charging ? 1 : 0.45,
-              }"
+              v-for="(slot, i) in hourSlots"
+              :key="i"
+              class="flex-1 rounded-xs transition-all hover:opacity-80"
+              :class="slot.charging ? 'bg-primary' : 'bg-muted-foreground/35'"
+              :style="{ height: `${slot.height}%` }"
+              :title="`Slot ${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'} — ${slot.height}% (${slot.charging ? 'Charging' : 'On Battery'})`"
             />
           </div>
 
-          <!-- Time Legend Labels -->
+          <!-- Timeline Time Labels -->
           <div class="flex justify-between text-[11px] font-mono text-muted-foreground mt-2">
             <span>12 AM</span>
             <span>6 AM</span>
@@ -187,13 +236,13 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
         <div class="mt-8 space-y-2 border-t border-border pt-4">
           <button
             type="button"
-            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group"
+            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group cursor-pointer"
             @click="router.push('/health')"
           >
             <div>
-              <span class="font-serif text-2xl font-medium">91%</span>
+              <span class="font-serif text-2xl font-medium">{{ battery.healthPercentage }}%</span>
               <span class="text-sm text-muted-foreground ml-2"
-                >of original capacity · 212 cycles</span
+                >of original capacity · {{ battery.cycleCount }} cycles</span
               >
             </div>
             <span
@@ -205,7 +254,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
 
           <button
             type="button"
-            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group border-t border-border/60 pt-3"
+            class="w-full text-left py-2 flex items-baseline justify-between hover:text-primary transition group border-t border-border/60 pt-3 cursor-pointer"
             @click="router.push('/device')"
           >
             <span class="text-sm text-muted-foreground"> HP EliteBook 850 G7 · SMP battery </span>
