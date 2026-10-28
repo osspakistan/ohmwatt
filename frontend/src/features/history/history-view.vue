@@ -214,7 +214,7 @@ onUnmounted(() => {
     <div v-else class="space-y-4">
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Charge & Discharge Log (Live Hardware Telemetry)
+          Charge & Discharge Log
         </h2>
         <span class="text-xs font-mono text-muted-foreground">
           {{ realSessions.length + (activeSession ? 1 : 0) }} total sessions
@@ -233,12 +233,6 @@ onUnmounted(() => {
         <div class="flex items-center justify-between flex-wrap gap-3">
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <span
-                class="inline-flex items-center gap-1.5 text-[10px] uppercase font-mono font-semibold px-2 py-0.5 rounded bg-primary text-primary-foreground tracking-wide"
-              >
-                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                Active Now · In Progress
-              </span>
               <span class="text-sm font-semibold text-foreground">
                 {{ activeSession.isCharging ? 'Active Charge' : 'Battery Discharge' }} ({{
                   activeSession.startPct
@@ -272,11 +266,7 @@ onUnmounted(() => {
                 {{ activeSession.peakTemp }}
               </div>
             </div>
-            <div
-              class="text-xs font-mono uppercase text-primary font-medium group-hover:translate-x-0.5 transition-transform hidden sm:block"
-            >
-              Inspect →
-            </div>
+
           </div>
         </div>
       </div>
@@ -335,11 +325,7 @@ onUnmounted(() => {
                   {{ s.peakTemp }}
                 </div>
               </div>
-              <div
-                class="text-xs font-mono uppercase text-muted-foreground group-hover:text-primary transition-colors hidden sm:block"
-              >
-                Forensics →
-              </div>
+
             </div>
           </div>
         </div>
