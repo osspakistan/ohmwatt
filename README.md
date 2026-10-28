@@ -318,17 +318,25 @@ wails3 build
 
 *(or via Wails task runner: `wails3 task run`)*
 
-### 7. Run Quality Gates
+### 7. Frontend Tooling & Commands
 
-Verify linters, formatting, and TypeScript compilation:
+All frontend commands run from the `frontend/` directory using `bun` (or `npm`):
 
 ```bash
 cd frontend
-bun run check
-cd ..
 ```
 
-*(This runs `oxfmt`, `oxlint`, `eslint`, and `vue-tsc --noEmit`)*.
+| Command | Description |
+| :--- | :--- |
+| `bun run check` | Runs the full pre-commit pipeline: formatting, lint autofixing, and type checking. Must pass with 0 errors. |
+| `bun run fix` | Combines `format` and `lint:fix` into a single autofix pass. |
+| `bun run format` | Formats all files under `src/` using ultra-fast Rust-based `oxfmt`. |
+| `bun run lint` | Runs ESLint across the codebase using disk caching (`eslint . --cache`). |
+| `bun run lint:fix` | Runs `oxlint . --fix` followed by `eslint . --fix --cache` to resolve stylistic and rule violations. |
+| `bun run type` | Validates TypeScript and Vue 3 template types without emitting output (`vue-tsc --noEmit`). |
+| `bun run dev` | Launches standalone Vite dev server with hot module replacement (HMR). |
+| `bun run build` | Runs `check` quality gates and compiles the production frontend assets into `frontend/dist/`. |
+| `bun run shadcn` | Adds official shadcn-vue primitives to `components/ui/` (e.g. `bun run shadcn button`). |
 
 ---
 
