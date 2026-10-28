@@ -131,14 +131,27 @@ func (b *LinuxBackend) GetBatteryHealth() (*battery.Health, error) {
 		return nil, err
 	}
 
+	designWh := float64(live.DesignCapacity) * 11.55 / 1000.0
+	fullWh := float64(live.FullCapacity) * 11.55 / 1000.0
+
+	// Estimate 80% degradation horizon based on cycle rate
+	estHorizon := "Nominal"
+	if live.HealthPercentage <= 80 {
+		estHorizon = "Threshold reached"
+	} else if live.CycleCount > 0 {
+		cyclesPerPercent := float64(live.CycleCount) / math.Max(1.0, float64(100-live.HealthPercentage))
+		cyclesTo80 := int((float64(live.HealthPercentage) - 80.0) * cyclesPerPercent)
+		estHorizon = fmt.Sprintf("~%d cycles", cyclesTo80)
+	}
+
 	health := &battery.Health{
 		HealthPercentage:  live.HealthPercentage,
 		CycleCount:        live.CycleCount,
-		DesignCapacityWh:  float64(live.DesignCapacity) * 11.55 / 1000.0,
-		FullCapacityWh:    float64(live.FullCapacity) * 11.55 / 1000.0,
-		EstimatedDate80:   "Mar 2028",
-		HoursAtHighStress: 42,
-		DeepDischarges:    14,
+		DesignCapacityWh:  math.Round(designWh*10) / 10,
+		FullCapacityWh:    math.Round(fullWh*10) / 10,
+		EstimatedDate80:   estHorizon,
+		HoursAtHighStress: 0,
+		DeepDischarges:    0,
 	}
 
 	if health.HealthPercentage >= 85 {
@@ -163,31 +176,54 @@ func (b *LinuxBackend) GetDeviceSpecs() (*hardware.DeviceSpecs, error) {
 		props = b.readUeventProps(filepath.Join(batPath, "uevent"))
 	}
 
+	voltMinMicro := parseNum(props["POWER_SUPPLY_VOLTAGE_MIN_DESIGN"])
+	if voltMinMicro == 0 {
+		voltMinMicro = parseNum(props["POWER_SUPPLY_VOLTAGE_NOW"])
+	}
+	nomVolts := float64(voltMinMicro) / 1_000_000.0
+	if nomVolts <= 0 {
+		nomVolts = 11.55
+	}
+
+	designAh := float64(parseNum(props["POWER_SUPPLY_CHARGE_FULL_DESIGN"])) / 1_000_000.0
+	fullAh := float64(parseNum(props["POWER_SUPPLY_CHARGE_FULL"])) / 1_000_000.0
+	var designWh, fullWh float64
+	if designAh > 0 {
+		designWh = designAh * nomVolts
+	} else {
+		designWh = float64(parseNum(props["POWER_SUPPLY_ENERGY_FULL_DESIGN"])) / 1_000_000.0
+	}
+	if fullAh > 0 {
+		fullWh = fullAh * nomVolts
+	} else {
+		fullWh = float64(parseNum(props["POWER_SUPPLY_ENERGY_FULL"])) / 1_000_000.0
+	}
+
 	specs := &hardware.DeviceSpecs{
 		BatteryManufacturer: props["POWER_SUPPLY_MANUFACTURER"],
 		BatteryModel:        props["POWER_SUPPLY_MODEL_NAME"],
 		BatterySerial:       props["POWER_SUPPLY_SERIAL_NUMBER"],
 		BatteryTechnology:   props["POWER_SUPPLY_TECHNOLOGY"],
-		DesignVoltage:       "11.55 V",
-		DesignCapacityWh:    "56.0 Wh",
-		FullChargeWh:        "44.7 Wh",
+		DesignVoltage:       fmt.Sprintf("%.2f V", nomVolts),
+		DesignCapacityWh:    fmt.Sprintf("%.1f Wh", designWh),
+		FullChargeWh:        fmt.Sprintf("%.1f Wh", fullWh),
 
-		LaptopManufacturer: readDMI("sys_vendor", "HP"),
-		LaptopModel:        readDMI("product_name", "EliteBook 850 G7 Notebook PC"),
-		LaptopSerial:       readDMI("product_serial", "5CG112233X"),
-		BiosVersion:        readDMI("bios_version", "S73 Ver. 01.16.00"),
+		LaptopManufacturer: readDMI("sys_vendor", "Generic System"),
+		LaptopModel:        readDMI("product_name", "Linux Laptop"),
+		LaptopSerial:       readDMI("product_serial", "Not Reported"),
+		BiosVersion:        readDMI("bios_version", "Not Reported"),
 		TotalMemoryRAM:     readTotalRAM(),
 		KernelVersion:      readSysfsString("/proc/sys/kernel/osrelease", "Linux"),
 	}
 
 	if specs.BatteryManufacturer == "" {
-		specs.BatteryManufacturer = "SMP (Simplo Technology)"
+		specs.BatteryManufacturer = "OEM Battery"
 	}
 	if specs.BatteryModel == "" {
 		specs.BatteryModel = "Primary"
 	}
 	if specs.BatteryTechnology == "" {
-		specs.BatteryTechnology = "Lithium-Polymer (Li-poly)"
+		specs.BatteryTechnology = "Li-ion"
 	}
 
 	return specs, nil
@@ -216,8 +252,9 @@ func (b *LinuxBackend) GetAdapterInfo() (*power.AdapterInfo, error) {
 
 // GetHibernateDiagnostic validates swap partition, kernel parameters, and RAM.
 func (b *LinuxBackend) GetHibernateDiagnostic() (*hibernate.Diagnostic, error) {
-	ramGiB := 22.0
+	ramGiB := math.Round(readRAMGiB()*10) / 10
 	swapGiB := readSwapSizeGiB()
+	recSwap := math.Ceil(ramGiB)
 
 	diag := &hibernate.Diagnostic{
 		RamSizeGiB:        ramGiB,
@@ -228,9 +265,9 @@ func (b *LinuxBackend) GetHibernateDiagnostic() (*hibernate.Diagnostic, error) {
 		Checks: []hibernate.CheckItem{
 			{
 				Title:   "Swap Capacity",
-				Passed:  swapGiB >= 16.0,
-				Detail:  fmt.Sprintf("%.1f GiB allocated (recommended at least 20.0 GiB for 22 GiB RAM)", swapGiB),
-				Command: "sudo fallocate -l 24G /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile",
+				Passed:  swapGiB >= ramGiB*0.8,
+				Detail:  fmt.Sprintf("%.1f GiB allocated (recommended at least %.0f GiB for %.0f GiB RAM)", swapGiB, recSwap, ramGiB),
+				Command: fmt.Sprintf("sudo fallocate -l %.0fG /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile", recSwap+2),
 			},
 			{
 				Title:   "Kernel Resume Parameter",
@@ -358,7 +395,7 @@ func readDMI(entry string, fallback string) string {
 func readTotalRAM() string {
 	data, err := os.ReadFile("/proc/meminfo")
 	if err != nil {
-		return "22 GiB"
+		return "Unknown"
 	}
 	for _, line := range strings.Split(string(data), "\n") {
 		if strings.HasPrefix(line, "MemTotal:") {
@@ -370,7 +407,24 @@ func readTotalRAM() string {
 			}
 		}
 	}
-	return "22 GiB"
+	return "Unknown"
+}
+
+func readRAMGiB() float64 {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 8.0
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "MemTotal:") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				kb, _ := strconv.Atoi(fields[1])
+				return float64(kb) / (1024.0 * 1024.0)
+			}
+		}
+	}
+	return 8.0
 }
 
 func readSwapSizeGiB() float64 {
