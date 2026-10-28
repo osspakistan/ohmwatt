@@ -183,8 +183,11 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
           </p>
         </div>
 
-        <!-- 4-Column Live Metric Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+        <!-- Live Metric Grid: 4 columns when charging, 3 columns when on battery -->
+        <div
+          class="grid grid-cols-2 gap-3 pt-2"
+          :class="isCharging ? 'sm:grid-cols-4' : 'sm:grid-cols-3'"
+        >
           <div class="rounded-xl border border-border bg-card p-3">
             <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
               Voltage
@@ -205,7 +208,7 @@ const hourSlots = Array.from({ length: 48 }, (_, i) => {
               {{ temperature }}
             </div>
           </div>
-          <div class="rounded-xl border border-border bg-card p-3">
+          <div v-if="isCharging" class="rounded-xl border border-border bg-card p-3">
             <div class="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
               Charger
             </div>
