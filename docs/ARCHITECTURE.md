@@ -1,12 +1,12 @@
-# Antlion Architecture Guide — Go + Wails v3 + Vue 3
+# OhmWatt Architecture Guide — Go + Wails v3 + Vue 3
 
-Architectural blueprint for **Antlion Desktop Battery Monitor & Power Management Tool**.
+Architectural blueprint for **OhmWatt Desktop Battery Monitor & Power Management Tool**.
 
 ---
 
 ## 1. High-Level Mental Model & Stack
 
-Antlion follows a **two-tier architecture**:
+OhmWatt follows a **two-tier architecture**:
 1. **Frontend (Presentation & UI)**: Vue 3 (Composition API, `<script setup>`), Vite, Tailwind CSS v4, shadcn-vue primitives (`reka-ui`), Hugeicons, bundled `@fontsource/instrument-sans`, and directional desktop transitions.
 2. **Backend (Core Hardware Engine)**: Wails v3 + Go desktop application shell, pure-Go SQLite local database, and strictly isolated platform hardware drivers.
 
@@ -179,6 +179,6 @@ type BatteryBackend interface {
 
 ## 5. Event-Driven Performance & Zero Polling
 
-- When running minimized or in the background, Antlion **does not poll**.
-- On Linux, it listens to D-Bus signals from UPower over `godbus`. When the power cable is plugged/unplugged or capacity changes, the OS notifies Antlion.
+- When running minimized or in the background, OhmWatt **does not poll**.
+- On Linux, it listens to D-Bus signals from UPower over `godbus`. When the power cable is plugged/unplugged or capacity changes, the OS notifies OhmWatt.
 - When the user opens and focuses the dashboard window, real-time telemetry updates every **2 seconds** for smooth liquid wave animations without waking the CPU unnecessarily.

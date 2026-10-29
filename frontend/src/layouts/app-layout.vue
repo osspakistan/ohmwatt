@@ -48,7 +48,7 @@ function isActive(path: string) {
     class="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground font-sans antialiased"
   >
     <!-- Top Window Chrome / Draggable Toolbar -->
-    <AppToolbar title="Antlion" />
+    <AppToolbar title="OhmWatt" />
 
     <!-- Application Body: Slim Left Rail + Main Screen Content -->
     <div class="flex flex-1 overflow-hidden">

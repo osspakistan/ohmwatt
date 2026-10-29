@@ -69,7 +69,7 @@ func detectCountryCode() string {
 }
 
 // SaveScreenshot writes a base64 PNG data URL to ~/Downloads/
-// with the format: antlion-[screenName]-[YYYY-MM-DD-hh-mm-ss-AM/PM]-[CountryCode].png
+// with the format: ohmwatt-[screenName]-[YYYY-MM-DD-hh-mm-ss-AM/PM]-[CountryCode].png
 func (s *ScreenshotService) SaveScreenshot(screenName string, dataURL string) (string, error) {
 	raw := dataURL
 	if idx := strings.Index(dataURL, ","); idx != -1 {
@@ -89,7 +89,7 @@ func (s *ScreenshotService) SaveScreenshot(screenName string, dataURL string) (s
 	// Destination directory: ~/Downloads
 	dir := filepath.Join(home, "Downloads")
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		dir = filepath.Join(home, ".local", "share", "antlion", "screenshots")
+		dir = filepath.Join(home, ".local", "share", "ohmwatt", "screenshots")
 		_ = os.MkdirAll(dir, 0755)
 	}
 
@@ -105,15 +105,15 @@ func (s *ScreenshotService) SaveScreenshot(screenName string, dataURL string) (s
 	timestamp := now.Format("2006-01-02-03-04-05-PM")
 	countryCode := detectCountryCode()
 
-	filename := fmt.Sprintf("antlion-%s-%s-%s.png", cleanScreen, timestamp, countryCode)
+	filename := fmt.Sprintf("ohmwatt-%s-%s-%s.png", cleanScreen, timestamp, countryCode)
 	outPath := filepath.Join(dir, filename)
 
 	if err := os.WriteFile(outPath, bytes, 0644); err != nil {
 		return "", fmt.Errorf("failed to write screenshot file: %w", err)
 	}
 
-	// Also mirror to ~/.local/share/antlion/screenshots/ for historical persistence
-	archiveDir := filepath.Join(home, ".local", "share", "antlion", "screenshots")
+	// Also mirror to ~/.local/share/ohmwatt/screenshots/ for historical persistence
+	archiveDir := filepath.Join(home, ".local", "share", "ohmwatt", "screenshots")
 	if err := os.MkdirAll(archiveDir, 0755); err == nil {
 		_ = os.WriteFile(filepath.Join(archiveDir, filename), bytes, 0644)
 	}

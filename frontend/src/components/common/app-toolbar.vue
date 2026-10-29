@@ -12,7 +12,7 @@ withDefaults(
     title?: string
   }>(),
   {
-    title: 'Antlion',
+    title: 'OhmWatt',
   },
 )
 
@@ -153,7 +153,7 @@ function handleClose() {
 
       <div class="h-3.5 w-[1px] bg-border" />
 
-      <!-- Brand Identity matching Antlion Toolbar Spec -->
+      <!-- Brand Identity matching OhmWatt Toolbar Spec -->
       <div class="flex items-center gap-2">
         <svg viewBox="0 0 48 48" class="h-5 w-5 flex-none text-foreground" aria-hidden="true">
           <rect

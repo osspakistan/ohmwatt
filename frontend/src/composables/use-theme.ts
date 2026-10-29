@@ -10,7 +10,7 @@ export function useTheme() {
       light: '',
       dark: 'dark',
     },
-    storageKey: 'antlion-theme',
+    storageKey: 'ohmwatt-theme',
   })
 
   const isDark = computed(() => mode.value === 'dark')

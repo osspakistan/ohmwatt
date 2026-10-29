@@ -116,15 +116,15 @@ tasks:
       - task: build
       - task: generate:dotdesktop
     cmds:
-      - mkdir -p /tmp/antlion-tarball/antlion
-      - cp "{{.ROOT_DIR}}/bin/{{.APP_NAME}}" /tmp/antlion-tarball/antlion/{{.APP_NAME}}
-      - cp "{{.ROOT_DIR}}/build/linux/{{.APP_NAME}}.desktop" /tmp/antlion-tarball/antlion/
-      - cp "{{.ROOT_DIR}}/frontend/public/antlion-mark.svg" /tmp/antlion-tarball/antlion/antlion.svg
-      - cp "{{.ROOT_DIR}}/frontend/public/antlion-mark-512.png" /tmp/antlion-tarball/antlion/antlion-512.png
-      - cp "{{.ROOT_DIR}}/build/linux/install.sh" /tmp/antlion-tarball/antlion/install.sh
-      - chmod +x /tmp/antlion-tarball/antlion/install.sh
-      - tar -czf "{{.ROOT_DIR}}/bin/antlion-linux-{{.TARGET_ARCH}}.tar.gz" -C /tmp/antlion-tarball antlion
-      - rm -rf /tmp/antlion-tarball
+      - mkdir -p /tmp/ohmwatt-tarball/ohmwatt
+      - cp "{{.ROOT_DIR}}/bin/{{.APP_NAME}}" /tmp/ohmwatt-tarball/ohmwatt/{{.APP_NAME}}
+      - cp "{{.ROOT_DIR}}/build/linux/{{.APP_NAME}}.desktop" /tmp/ohmwatt-tarball/ohmwatt/
+      - cp "{{.ROOT_DIR}}/frontend/public/ohmwatt-mark.svg" /tmp/ohmwatt-tarball/ohmwatt/ohmwatt.svg
+      - cp "{{.ROOT_DIR}}/frontend/public/antlion-mark-512.png" /tmp/ohmwatt-tarball/ohmwatt/ohmwatt-512.png
+      - cp "{{.ROOT_DIR}}/build/linux/install.sh" /tmp/ohmwatt-tarball/ohmwatt/install.sh
+      - chmod +x /tmp/ohmwatt-tarball/ohmwatt/install.sh
+      - tar -czf "{{.ROOT_DIR}}/bin/ohmwatt-linux-{{.TARGET_ARCH}}.tar.gz" -C /tmp/ohmwatt-tarball ohmwatt
+      - rm -rf /tmp/ohmwatt-tarball
     vars:
       TARGET_ARCH: '{{.ARCH | default ARCH}}'
 

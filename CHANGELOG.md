@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Antlion are documented in this file.
+All notable changes to OhmWatt are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -20,13 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial Linux Release
 
-First production release of Antlion, a precision battery and power management desktop app built with Go, Wails v3, Vue 3, and SQLite.
+First production release of OhmWatt, a precision battery and power management desktop app built with Go, Wails v3, Vue 3, and SQLite.
 
 ### Added
 - **Direct Linux Kernel Telemetry**: Reads battery registers (`BAT0`, `BAT1`, `AC`) directly from `/sys/class/power_supply/` (voltage, micro-amperes, wattage, capacity, cycle count, and temperature).
 - **Fluid Battery Vessel Dashboard**: Animated fluid gauge showing the current battery percentage and charge state with a live charging pulse.
 - **48-Slot Hourly Telemetry Strip**: Displays 48 hours of recorded battery levels to show drain rates and charging cycles over time.
-- **Pure-Go SQLite Persistence**: Stores session history in `~/.local/share/antlion/antlion.db` using WAL mode for safe writes without database corruption across reboots.
+- **Pure-Go SQLite Persistence**: Stores session history in `~/.local/share/ohmwatt/ohmwatt.db` using WAL mode for safe writes without database corruption across reboots. Automatically migrates legacy database if present.
 - **Session History Ledger**: Records charge and discharge sessions with start and end levels, duration, average wattage, peak wattage, and peak temperature.
 - **Session Detail Sheet**: Slide-out panel showing electrical forensics (volts, amps, watt-hours, and temperature ranges) for any recorded session.
 - **Cycle Count and Health Tracking**: Tracks ACPI cycle counts, design capacity versus actual full capacity, and daily battery wear.

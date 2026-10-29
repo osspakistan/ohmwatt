@@ -17,19 +17,28 @@ type DB struct {
 	conn *sql.DB
 }
 
-// NewDB initializes or opens the SQLite database at ~/.local/share/antlion/antlion.db.
+// NewDB initializes or opens the SQLite database at ~/.local/share/ohmwatt/ohmwatt.db.
 func NewDB() (*DB, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		home = "."
 	}
 
-	dataDir := filepath.Join(home, ".local", "share", "antlion")
+	dataDir := filepath.Join(home, ".local", "share", "ohmwatt")
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create data dir: %w", err)
 	}
 
-	dbPath := filepath.Join(dataDir, "antlion.db")
+	dbPath := filepath.Join(dataDir, "ohmwatt.db")
+
+	// Backwards compatibility: migrate legacy ~/.local/share/antlion/antlion.db if present
+	legacyDb := filepath.Join(home, ".local", "share", "antlion", "antlion.db")
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		if data, err := os.ReadFile(legacyDb); err == nil {
+			_ = os.WriteFile(dbPath, data, 0644)
+		}
+	}
+
 	conn, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open sqlite database: %w", err)

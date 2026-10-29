@@ -25,7 +25,7 @@ func init() {
 }
 
 func main() {
-	// Initialize Persistent SQLite Database (~/.local/share/antlion/antlion.db)
+	// Initialize Persistent SQLite Database (~/.local/share/ohmwatt/ohmwatt.db)
 	db, err := sqlite.NewDB()
 	if err != nil {
 		log.Printf("Warning: failed to initialize SQLite database: %v", err)
@@ -55,8 +55,8 @@ func main() {
 	screenshotSvc := service.NewScreenshotService()
 
 	app := application.New(application.Options{
-		Name:        "Antlion",
-		Description: "Calm, precision battery monitor & power management for Linux",
+		Name:        "OhmWatt",
+		Description: "Calm, precision battery and power management for Linux",
 		Services: []application.Service{
 			application.NewService(batterySvc),
 			application.NewService(deviceSvc),
@@ -74,7 +74,7 @@ func main() {
 
 	// Main Application Window: Frameless with Caffeine dark background #111111
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:     "Antlion — Battery Management",
+		Title:     "OhmWatt: Precision Battery Monitor",
 		Width:     1060,
 		Height:    740,
 		MinWidth:  860,

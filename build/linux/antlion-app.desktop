@@ -1,10 +1,11 @@
 [Desktop Entry]
 Type=Application
-Name=antlion-app
-Exec=antlion-app
-Icon=antlion-app
-Categories=Development;
+Name=OhmWatt
+Comment=Precision battery and power monitor for Linux
+Exec=ohmwatt
+Icon=ohmwatt
+Categories=Utility;System;Monitor;
 Terminal=false
-Keywords=wails
+Keywords=battery;power;telemetry;sysfs;ohmwatt;
 Version=1.0
 StartupNotify=false

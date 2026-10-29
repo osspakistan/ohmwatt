@@ -1,4 +1,4 @@
-name: Release Antlion Desktop
+name: Release OhmWatt Desktop
 
 on:
   push:
@@ -56,7 +56,7 @@ jobs:
       - name: Generate Cryptographic Checksums
         working-directory: ./bin
         run: |
-          sha256sum antlion-app.deb antlion-app.rpm antlion-app.pkg.tar.zst antlion-linux-amd64.tar.gz antlion-app-x86_64.AppImage > SHA256SUMS.txt
+          sha256sum ohmwatt.deb ohmwatt.rpm ohmwatt.pkg.tar.zst ohmwatt-linux-amd64.tar.gz ohmwatt-x86_64.AppImage > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Extract Release Notes from CHANGELOG
@@ -76,11 +76,11 @@ jobs:
         with:
           body_path: RELEASE_NOTES.md
           files: |
-            bin/antlion-app.deb
-            bin/antlion-app.rpm
-            bin/antlion-app.pkg.tar.zst
-            bin/antlion-linux-amd64.tar.gz
-            bin/antlion-app-x86_64.AppImage
+            bin/ohmwatt.deb
+            bin/ohmwatt.rpm
+            bin/ohmwatt.pkg.tar.zst
+            bin/ohmwatt-linux-amd64.tar.gz
+            bin/ohmwatt-x86_64.AppImage
             bin/SHA256SUMS.txt
           generate_release_notes: false
           draft: false

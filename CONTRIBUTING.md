@@ -1,6 +1,6 @@
-# Contributing to Antlion
+# Contributing to OhmWatt
 
-Antlion is an engineering-grade, calm power and battery telemetry monitor built with Go, Wails v3, Vue 3, and SQLite. Contributions that improve hardware accuracy, driver support, UI precision, and performance are welcome.
+OhmWatt is an engineering-grade, calm power and battery telemetry monitor built with Go, Wails v3, Vue 3, and SQLite. Contributions that improve hardware accuracy, driver support, UI precision, and performance are welcome.
 
 ---
 
@@ -9,16 +9,16 @@ Antlion is an engineering-grade, calm power and battery telemetry monitor built 
 All contributions must strictly adhere to three foundational engineering principles:
 
 ### A. Zero-Mock Policy
-Antlion is an engineering tool, not a concept mock.
+OhmWatt is an engineering tool, not a concept mock.
 - **Never commit fake numbers**: Do not hardcode static battery percentages (e.g. `91%`), synthetic cycle counts (e.g. `212`), dummy wattage, or simulated charge curves.
 - **Never mock hardware registers**: All telemetry must originate from real kernel sysfs entries (`/sys/class/power_supply/`), ACPI registers, or genuine platform APIs.
 - **Graceful hardware adaptation**: If a machine has a single battery (`BAT0`), automatically collapse and hide dual-battery vessels (`BAT1`). Never render placeholder `(mock)` labels to end users.
 - **No synthetic seed databases**: Never commit pre-filled test databases or fake historical sessions.
 
 ### B. Local-First & Zero Telemetry
-- Antlion makes **zero outbound network calls**.
+- OhmWatt makes **zero outbound network calls**.
 - Never introduce analytics SDKs, tracking pixels, crash collectors, or third-party telemetry services.
-- All session logs and health metrics must remain strictly in the local SQLite database (`~/.local/share/antlion/antlion.db`).
+- All session logs and health metrics must remain strictly in the local SQLite database (`~/.local/share/ohmwatt/ohmwatt.db`).
 
 ### C. Performance & Resource Footprint
 - Keep the runtime memory footprint under **~25 MB** RAM.
@@ -53,8 +53,8 @@ Antlion is an engineering tool, not a concept mock.
 
 ### Initial Setup
 ```bash
-git clone https://github.com/osspakistan/antlion-desktop.git
-cd antlion-desktop/antlion-app
+git clone https://github.com/osspakistan/ohmwatt.git
+cd ohmwatt/antlion-app
 
 # Install frontend dependencies
 cd frontend
@@ -91,7 +91,7 @@ Verifies Go compilation, CGO bindings, and Wails desktop packaging:
 wails3 build
 ```
 
-Ensure the compiled executable generates cleanly in `bin/antlion-app`.
+Ensure the compiled executable generates cleanly in `bin/ohmwatt`.
 
 ---
 
@@ -130,13 +130,13 @@ Commit history must remain clean, atomic, and informative. Follow the [Conventio
    git fetch origin
    git rebase origin/main
    ```
-5. Submit the pull request to `osspakistan/antlion-desktop` with clear test notes detailing the Linux distribution, kernel version, and laptop model used for verification.
+5. Submit the pull request to `osspakistan/ohmwatt` with clear test notes detailing the Linux distribution, kernel version, and laptop model used for verification.
 
 ---
 
 ## 6. Release Management Guide
 
-Antlion release cycles adhere to [Semantic Versioning 2.0.0](https://semver.org/) (`vMAJOR.MINOR.PATCH`) and [Keep a Changelog 1.1.0](https://keepachangelog.com/).
+OhmWatt release cycles adhere to [Semantic Versioning 2.0.0](https://semver.org/) (`vMAJOR.MINOR.PATCH`) and [Keep a Changelog 1.1.0](https://keepachangelog.com/).
 
 ### 6.1 Versioning Rules
 - **MAJOR (`X.0.0`)**: Incompatible architectural overhauls, database schema migrations without backward compatibility, or breaking driver interface shifts.
@@ -176,11 +176,11 @@ Every release must document all user-facing changes under standard subheadings:
 Pushing a `v*` tag triggers the GitHub Actions workflow in [`.github/workflows/release.yml`](.github/workflows/release.yml), which automatically:
 1. Validates `bun run check` with 0 errors.
 2. Compiles production binaries and packages all 5 Linux targets:
-   - **`antlion-app.deb`**: Debian / Ubuntu package via `wails3 task linux:create:deb`.
-   - **`antlion-app.rpm`**: Fedora / RHEL package via `wails3 task linux:create:rpm`.
-   - **`antlion-app.pkg.tar.zst`**: Arch Linux package via `wails3 task linux:create:aur`.
-   - **`antlion-linux-amd64.tar.gz`**: Universal tarball with rootless `install.sh` via `wails3 task linux:create:tarball`.
-   - **`antlion-app-x86_64.AppImage`**: Standalone executable bundling WebKitGTK via `wails3 task linux:create:appimage`.
+   - **`ohmwatt.deb`**: Debian / Ubuntu package via `wails3 task linux:create:deb`.
+   - **`ohmwatt.rpm`**: Fedora / RHEL package via `wails3 task linux:create:rpm`.
+   - **`ohmwatt.pkg.tar.zst`**: Arch Linux package via `wails3 task linux:create:aur`.
+   - **`ohmwatt-linux-amd64.tar.gz`**: Universal tarball with rootless `install.sh` via `wails3 task linux:create:tarball`.
+   - **`ohmwatt-x86_64.AppImage`**: Standalone executable bundling WebKitGTK via `wails3 task linux:create:appimage`.
 3. Computes cryptographic SHA256 checksums (`SHA256SUMS.txt`).
 4. Generates categorized release notes using [`.github/release.yml`](.github/release.yml).
-5. Publishes artifacts directly to [GitHub Releases](https://github.com/osspakistan/antlion-desktop/releases).
+5. Publishes artifacts directly to [GitHub Releases](https://github.com/osspakistan/ohmwatt/releases).

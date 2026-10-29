@@ -62,7 +62,7 @@ export function useScreenshot() {
 // Expose helper on window for external scripts/automation
 declare global {
   interface Window {
-    __antlion_capture_screenshot?: (
+    __ohmwatt_capture_screenshot?: (
       selector?: string,
       screenName?: string,
     ) => Promise<string | null>
@@ -71,5 +71,5 @@ declare global {
 
 if (typeof window !== 'undefined') {
   const { captureWindow } = useScreenshot()
-  window.__antlion_capture_screenshot = captureWindow
+  window.__ohmwatt_capture_screenshot = captureWindow
 }

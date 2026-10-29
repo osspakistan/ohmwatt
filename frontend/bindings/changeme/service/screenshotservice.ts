@@ -12,7 +12,7 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 
 /**
  * SaveScreenshot writes a base64 PNG data URL to ~/Downloads/
- * with the format: antlion-[screenName]-[YYYY-MM-DD-hh-mm-ss-AM/PM]-[CountryCode].png
+ * with the format: ohmwatt-[screenName]-[YYYY-MM-DD-hh-mm-ss-AM/PM]-[CountryCode].png
  */
 export function SaveScreenshot(screenName: string, dataURL: string): $CancellablePromise<string> {
     return $Call.ByID(148223033, screenName, dataURL);

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/antlion-icon.png" alt="Antlion Logo" width="96" height="96" />
+<img src="docs/assets/ohmwatt-icon.png" alt="OhmWatt Logo" width="96" height="96" />
 
-# Antlion
+# OhmWatt
 
 **A calm, precision battery and power management desktop app for engineers.**  
 No synthetic math. No cloud tracking. 100% direct kernel telemetry.
@@ -23,13 +23,13 @@ No synthetic math. No cloud tracking. 100% direct kernel telemetry.
 
 ## Visual Showcase
 
-Antlion reads hardware registers directly from Linux kernel sysfs nodes, rendering live battery levels, ACPI cycle degradation, and real-time power draw:
+OhmWatt reads hardware registers directly from Linux kernel sysfs nodes, rendering live battery levels, ACPI cycle degradation, and real-time power draw:
 
 <div align="center">
-  <img src="docs/assets/antlion-dashboard-preview.png" alt="Antlion Dashboard Preview" width="92%" />
-  <p><em>Live 2x Retina capture of Antlion running on Linux (HP EliteBook 850 G7) with ACPI cycle odometer and live 48-slot hourly telemetry strip.</em></p>
+  <img src="docs/assets/antlion-dashboard-preview.png" alt="OhmWatt Dashboard Preview" width="92%" />
+  <p><em>Live 2x Retina capture of OhmWatt running on Linux (HP EliteBook 850 G7) with ACPI cycle odometer and live 48-slot hourly telemetry strip.</em></p>
   <br />
-  <img src="docs/assets/antlion-health-preview.png" alt="Antlion Battery Health Preview" width="92%" />
+  <img src="docs/assets/antlion-health-preview.png" alt="OhmWatt Battery Health Preview" width="92%" />
   <p><em>Battery Health analytics showing true milliwatt-hour capacity, wear delta, high-temperature stress hours, and deep discharge counts.</em></p>
 </div>
 
@@ -49,7 +49,7 @@ Antlion reads hardware registers directly from Linux kernel sysfs nodes, renderi
 
 - **Direct Kernel Telemetry**: Reads raw voltage (`voltage_now`), micro-amperes (`current_now`), power draw (`power_now`), micro-watt-hours (`energy_now` / `charge_now`), and ACPI cycle counts directly from `/sys/class/power_supply/`.
 - **Zero-Mock Engineering**: Real telemetry only. No simulated curves, no fake cycle numbers, and no placeholder historical sessions. The UI adapts automatically if a secondary battery is not installed.
-- **Persistent SQLite Ledger**: Every charge and discharge session, temperature threshold event, and daily degradation snapshot is saved locally to SQLite (`~/.local/share/antlion/antlion.db`) using Write-Ahead Logging (WAL).
+- **Persistent SQLite Ledger**: Every charge and discharge session, temperature threshold event, and daily degradation snapshot is saved locally to SQLite (`~/.local/share/ohmwatt/ohmwatt.db`) using Write-Ahead Logging (WAL).
 - **Lightweight Desktop Footprint**: Built with Go and Wails v3 Alpha using the system WebKitGTK renderer. Memory footprint sits around 15 to 25 MB RAM with negligible background CPU usage.
 - **In-App 2x Retina Snapshots**: Built-in screenshot engine captures clean 2x Retina PNGs of any view directly to `~/Downloads/` with screen name and timestamp.
 - **100% Offline & Private**: Zero network calls. No telemetry. No analytics. No cloud accounts.
@@ -58,7 +58,7 @@ Antlion reads hardware registers directly from Linux kernel sysfs nodes, renderi
 
 ## Honest Status Matrix: What Works vs What Does Not
 
-To be completely transparent about the current state of Antlion, here is what is **actually implemented and functional today** versus what is **under active construction or planned**:
+To be completely transparent about the current state of OhmWatt, here is what is **actually implemented and functional today** versus what is **under active construction or planned**:
 
 | Capability | Status | Implementation Details |
 | :--- | :---: | :--- |
@@ -85,7 +85,7 @@ To be completely transparent about the current state of Antlion, here is what is
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                   Antlion Frontend                     │
+│                   OhmWatt Frontend                     │
 │  Vue 3.5 (Composition API) • TypeScript • Vite 6       │
 │  Tailwind CSS v4 • Radix Vue • @fontsource/instrument  │
 ├────────────────────────────────────────────────────────┤
@@ -112,7 +112,7 @@ To be completely transparent about the current state of Antlion, here is what is
 - **TypeScript 5.8+**: Strict type safety across all components, composables, and Wails RPC bindings.
 - **Tailwind CSS v4**: Ultra-fast utility styling engine with CSS variable design tokens.
 - **Radix Vue**: Accessible, headless primitives (Dialog, Sheet, Tooltip, Select, Switch).
-- **Icons**: Hugeicons, Lucide Vue Next, custom Antlion SVG iconography.
+- **Icons**: Hugeicons, Lucide Vue Next, custom OhmWatt SVG iconography.
 - **Typography**: `@fontsource/instrument-sans` for high-readability engineering telemetry.
 
 ### Tooling & Code Quality
@@ -252,7 +252,7 @@ antlion-app/
 
 ## Running & Building with Wails
 
-Antlion is built on [Wails v3](https://v3.wails.io). Use the official `wails3` CLI commands to develop, build, and package the application:
+OhmWatt is built on [Wails v3](https://v3.wails.io). Use the official `wails3` CLI commands to develop, build, and package the application:
 
 ### 1. Prerequisites
 
@@ -304,7 +304,7 @@ wails3 dev
 
 ### 5. Build Production Executable
 
-Compile the production desktop binary. This automatically regenerates TypeScript bindings, builds the Vite production bundle, and outputs the native executable to `bin/antlion-app`:
+Compile the production desktop binary. This automatically regenerates TypeScript bindings, builds the Vite production bundle, and outputs the native executable to `bin/ohmwatt`:
 
 ```bash
 wails3 build
@@ -313,7 +313,7 @@ wails3 build
 ### 6. Run the Built Binary
 
 ```bash
-./bin/antlion-app
+./bin/ohmwatt
 ```
 
 *(or via Wails task runner: `wails3 task run`)*
@@ -342,17 +342,17 @@ cd frontend
 
 ## Deployment & Release Management
 
-Antlion ships automated releases across five Linux package formats via GitHub Actions on every tag push (`v*`):
+OhmWatt ships automated releases across five Linux package formats via GitHub Actions on every tag push (`v*`):
 
 | Format | Target Distribution | Installation Command |
 | :--- | :--- | :--- |
-| **`.deb`** | Debian 12+, Ubuntu 22.04/24.04, Pop!_OS, Mint | `sudo dpkg -i antlion-app.deb` |
-| **`.rpm`** | Fedora 38+, RHEL 9+, openSUSE | `sudo dnf install antlion-app.rpm` |
-| **`.pkg.tar.zst`** | Arch Linux, Manjaro, EndeavourOS | `sudo pacman -U antlion-app.pkg.tar.zst` |
+| **`.deb`** | Debian 12+, Ubuntu 22.04/24.04, Pop!_OS, Mint | `sudo dpkg -i ohmwatt.deb` |
+| **`.rpm`** | Fedora 38+, RHEL 9+, openSUSE | `sudo dnf install ohmwatt.rpm` |
+| **`.pkg.tar.zst`** | Arch Linux, Manjaro, EndeavourOS | `sudo pacman -U ohmwatt.pkg.tar.zst` |
 | **`.tar.gz`** | Any Linux Distro / Rootless | `./install.sh --user` (no root required) |
-| **`.AppImage`** | Universal Linux Standalone | `chmod +x antlion-app-x86_64.AppImage && ./antlion-app-x86_64.AppImage` |
+| **`.AppImage`** | Universal Linux Standalone | `chmod +x ohmwatt-x86_64.AppImage && ./ohmwatt-x86_64.AppImage` |
 
-Pre-built binaries, cryptographic SHA256 checksums, and changelogs are published on [GitHub Releases](https://github.com/osspakistan/antlion-desktop/releases).
+Pre-built binaries, cryptographic SHA256 checksums, and changelogs are published on [GitHub Releases](https://github.com/osspakistan/ohmwatt/releases).
 
 ---
 
@@ -361,7 +361,7 @@ Pre-built binaries, cryptographic SHA256 checksums, and changelogs are published
 Contributions from systems engineers and frontend developers are welcome. All changes must adhere to the project's engineering standards:
 
 ### 1. Zero-Mock Policy
-Antlion is an engineering telemetry monitor. **Never hardcode fake numbers**, mock dates, static cycle counts (e.g. `212`), fake health values (e.g. `91%`), or synthetic DB seed sessions. If a machine lacks dual batteries (`BAT1`), the UI must gracefully adapt and hide the secondary vessel. Never show `(mock)` labels to end users.
+OhmWatt is an engineering telemetry monitor. **Never hardcode fake numbers**, mock dates, static cycle counts (e.g. `212`), fake health values (e.g. `91%`), or synthetic DB seed sessions. If a machine lacks dual batteries (`BAT1`), the UI must gracefully adapt and hide the secondary vessel. Never show `(mock)` labels to end users.
 
 ### 2. Strict Quality Gates
 Before submitting any pull request, ensure:
@@ -399,12 +399,12 @@ The repository enforces atomic, conventional commits:
 ## Privacy & Offline Guarantee
 
 Hardware telemetry belongs exclusively to the machine owner:
-- **Zero Network Calls**: Antlion makes zero outgoing HTTP, DNS, or socket calls.
+- **Zero Network Calls**: OhmWatt makes zero outgoing HTTP, DNS, or socket calls.
 - **Zero Analytics SDKs**: No Google Analytics, no PostHog, no Sentry, no crash collectors.
-- **Local SQLite Storage**: All recorded telemetry stays inside `~/.local/share/antlion/antlion.db`.
+- **Local SQLite Storage**: All recorded telemetry stays inside `~/.local/share/ohmwatt/ohmwatt.db`.
 
 ---
 
 ## License
 
-Antlion is open-source software licensed under the [MIT License](LICENSE).
+OhmWatt is open-source software licensed under the [MIT License](LICENSE).

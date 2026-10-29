@@ -3,30 +3,30 @@
 #
 # The lines below are called `modelines`. See `:help modeline`
 
-name: "antlion"
+name: "ohmwatt"
 arch: ${GOARCH}
 platform: "linux"
 version: "0.1.0"
 section: "utils"
 priority: "optional"
 maintainer: "Awais alwaisy <awaisalwaisy@gmail.com>"
-description: "Calm, precision battery and power management desktop app"
+description: "Precision battery and power management desktop app for Linux"
 vendor: "OSS Pakistan"
 homepage: "https://alwaisy.dev"
 license: "MIT"
 release: "1"
 
 contents:
-  - src: "./bin/antlion-app"
-    dst: "/usr/local/bin/antlion-app"
+  - src: "./bin/ohmwatt"
+    dst: "/usr/local/bin/ohmwatt"
   - src: "./build/appicon.png"
-    dst: "/usr/share/icons/hicolor/128x128/apps/antlion-app.png"
+    dst: "/usr/share/icons/hicolor/128x128/apps/ohmwatt.png"
   - src: "./frontend/public/antlion-mark-512.png"
-    dst: "/usr/share/icons/hicolor/512x512/apps/antlion-app.png"
-  - src: "./frontend/public/antlion-mark.svg"
-    dst: "/usr/share/icons/hicolor/scalable/apps/antlion-app.svg"
-  - src: "./build/linux/antlion-app.desktop"
-    dst: "/usr/share/applications/antlion-app.desktop"
+    dst: "/usr/share/icons/hicolor/512x512/apps/ohmwatt.png"
+  - src: "./frontend/public/ohmwatt-mark.svg"
+    dst: "/usr/share/icons/hicolor/scalable/apps/ohmwatt.svg"
+  - src: "./build/linux/ohmwatt.desktop"
+    dst: "/usr/share/applications/ohmwatt.desktop"
 
 # Default dependencies for the GTK4 + WebKitGTK 6.0 stack (Ubuntu 24.04+ / Debian 13+)
 depends:

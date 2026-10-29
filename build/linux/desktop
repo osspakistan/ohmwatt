@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
-Name=My Product
-Comment=A antlion-app application
+Name=OhmWatt
+Comment=Precision battery and power monitor for Linux
 # The Exec line includes %u to pass the URL to the application
-Exec=/usr/local/bin/antlion-app %u
+Exec=/usr/local/bin/ohmwatt %u
 Terminal=false
 Type=Application
-Icon=antlion-app
-Categories=Utility;
-StartupWMClass=antlion-app
+Icon=ohmwatt
+Categories=Utility;System;Monitor;
+StartupWMClass=ohmwatt
 
  

@@ -5,10 +5,10 @@
 	"info": {
 		"0409": {
 			"ProductVersion": "0.1.0",
-			"CompanyName": "My Company",
-			"FileDescription": "A antlion-app application",
-			"LegalCopyright": "© 2026, My Company",
-			"ProductName": "My Product",
+			"CompanyName": "OSS Pakistan",
+			"FileDescription": "OhmWatt Desktop Application",
+			"LegalCopyright": "© 2026, OSS Pakistan & Awais alwaisy",
+			"ProductName": "OhmWatt",
 			"Comments": "This is a comment"
 		}
 	}

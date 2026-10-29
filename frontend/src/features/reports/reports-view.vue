@@ -110,9 +110,9 @@ onMounted(async () => {
       <div class="rounded-xl border border-border bg-card p-6 shadow-sm font-sans space-y-6">
         <div class="flex items-center justify-between border-b border-border pb-4">
           <div class="flex items-center gap-2">
-            <img src="/antlion-mark.svg" class="h-5 w-5" alt="Logo" />
+            <img src="/ohmwatt-mark.svg" class="h-5 w-5" alt="Logo" />
             <span class="font-serif text-lg font-semibold"
-              >Antlion Battery Inspection Certificate</span
+              >OhmWatt Battery Inspection Certificate</span
             >
           </div>
           <span class="font-mono text-xs text-muted-foreground">Generated: {{ currentDate }}</span>
