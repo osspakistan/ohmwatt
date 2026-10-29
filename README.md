@@ -23,7 +23,7 @@ No synthetic math. No cloud tracking. 100% direct kernel telemetry.
 
 ## Visual Showcase
 
-Antlion captures real physical telemetry directly from Linux kernel sysfs registers, rendering live fluid dynamics, real ACPI cycle degradation, and real-time power draw at 60 FPS:
+Antlion reads hardware registers directly from Linux kernel sysfs nodes, rendering live battery levels, ACPI cycle degradation, and real-time power draw:
 
 <div align="center">
   <img src="docs/assets/antlion-dashboard-preview.png" alt="Antlion Dashboard Preview" width="92%" />
@@ -39,19 +39,19 @@ Antlion captures real physical telemetry directly from Linux kernel sysfs regist
 
 ### The Problem
 
-1. **Operating System Inaccuracy**: Modern desktop OS battery meters provide a single coarse percentage and a constantly guessing "time remaining" estimate that swings wildly between "5 hours" and "40 minutes" under slight CPU bursts.
-2. **Electron Bloat**: Most third-party battery utilities are packaged as Chromium/Electron runtimes that consume 300MB–500MB of RAM and 5–10% background CPU, actively draining the very battery they are monitoring.
-3. **Hardcoded Math & Synthetic Data**: Common battery tools compute fake linear degradation curves, interpolate missing sensor points with arbitrary formulas, and fail entirely on multi-battery hardware (e.g. ThinkPads with internal `BAT0` and external `BAT1`).
-4. **Transient State Loss**: Most tools discard session history upon closing. When your laptop reboots or wakes from suspend, the charge session history is lost.
-5. **Privacy Violations**: Many popular power monitoring tools bundle analytics SDKs, crash reporters, and cloud sync services that phone home with machine serials and usage logs.
+1. **Operating System Inaccuracy**: Most desktop battery meters provide a coarse percentage and an erratic "time remaining" estimate that swings wildly between several hours and thirty minutes under brief CPU spikes.
+2. **Resource Overhead**: Many third-party battery utilities run on heavy Chromium or Electron runtimes that use 300 MB to 500 MB of RAM and 5% to 10% background CPU, draining the very battery they monitor.
+3. **Synthetic Calculations**: Standard battery tools often compute linear degradation curves and fail on multi-battery hardware (such as ThinkPads with internal `BAT0` and removable `BAT1`).
+4. **Transient State Loss**: Most tools discard session history on exit. When the laptop reboots or wakes from sleep, previous charge history is gone.
+5. **Telemetry & Tracking**: Several battery monitoring utilities bundle analytics SDKs, crash reporters, and cloud sync services that phone home with system identifiers and usage logs.
 
 ### The Solution
 
 - **Direct Kernel Telemetry**: Reads raw voltage (`voltage_now`), micro-amperes (`current_now`), power draw (`power_now`), micro-watt-hours (`energy_now` / `charge_now`), and ACPI cycle counts directly from `/sys/class/power_supply/`.
-- **Strict Zero-Mock Engineering**: Zero fake numbers, zero synthetic seed data, zero simulated curves. If hardware lacks dual batteries, the secondary vessel UI is automatically hidden.
-- **Persistent Pure-Go SQLite Ledger**: Every charge and discharge session, temperature threshold event, and daily degradation snapshot is saved locally to SQLite (`~/.local/share/antlion/antlion.db`) using Write-Ahead Logging (WAL).
-- **Lightweight Native Desktop Footprint**: Built with Go and Wails v3 Alpha utilizing the system's native WebKitGTK / WebView2 renderer. Memory footprint is ~15–25MB, with near-zero background CPU overhead.
-- **In-App 2x Retina Snapshots**: Built-in screenshot engine (`Method A`) captures crisp 2x Retina PNGs of any view directly to `~/Downloads/` with timestamp and screen metadata.
+- **Zero-Mock Engineering**: Real telemetry only. No simulated curves, no fake cycle numbers, and no placeholder historical sessions. The UI adapts automatically if a secondary battery is not installed.
+- **Persistent SQLite Ledger**: Every charge and discharge session, temperature threshold event, and daily degradation snapshot is saved locally to SQLite (`~/.local/share/antlion/antlion.db`) using Write-Ahead Logging (WAL).
+- **Lightweight Desktop Footprint**: Built with Go and Wails v3 Alpha using the system WebKitGTK renderer. Memory footprint sits around 15 to 25 MB RAM with negligible background CPU usage.
+- **In-App 2x Retina Snapshots**: Built-in screenshot engine captures clean 2x Retina PNGs of any view directly to `~/Downloads/` with screen name and timestamp.
 - **100% Offline & Private**: Zero network calls. No telemetry. No analytics. No cloud accounts.
 
 ---
@@ -379,9 +379,9 @@ The repository enforces atomic, conventional commits:
 
 ## Future Roadmap
 
-- [ ] **Phase 1: Release CI/CD Pipeline**
-  - Implement GitHub Actions workflow building `.deb` and `.AppImage` releases.
-  - Checksum generation and automated GitHub Release publication.
+- [x] **Phase 1: Release CI/CD Pipeline**
+  - Implement GitHub Actions workflow building `.deb`, `.rpm`, `.pkg.tar.zst`, `.tar.gz`, and `.AppImage` releases.
+  - SHA256 checksum generation and automated GitHub Release publication.
 - [ ] **Phase 2: System Tray & Background Monitoring**
   - Minimize-to-tray background daemon using Wails v3 system tray APIs.
   - Background power loss and thermal alert notifications.
