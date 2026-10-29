@@ -74,7 +74,7 @@ To be completely transparent about the current state of Antlion, here is what is
 | **In-App Retina Snapshot (Method A)** | **LIVE** | Exports 2x DPI lossless PNG to `~/Downloads/` with screen name and timestamp. |
 | **Theme System** | **LIVE** | Dark mode, Light mode, and Caffeine theme with localStorage persistence. |
 | **Frameless Window & Navigation** | **LIVE** | Custom draggable titlebar, navigation rail, and directional page transitions. |
-| **Automated Packaging & Releases** | **NOT YET** | **No `.deb` or `.AppImage` CI releases yet.** App must be compiled from source. |
+| **Linux Packaging & CI Automation** | **LIVE** | GitHub Actions workflow packaging `.deb`, `.rpm`, `.pkg.tar.zst`, `.tar.gz`, and `.AppImage`. |
 | **System Tray Background Daemon** | **IN PROGRESS** | Window minimize-to-tray and background polling daemon are being wired up. |
 | **Charge Threshold Limiter** | **PLANNED** | Setting charge limits (e.g. stop at 80%) requires PolicyKit / root daemon helper. |
 | **Windows & macOS Native Drivers** | **PLANNED** | Platform interface exists; Win32 / IOKit backend implementations are upcoming. |
@@ -340,16 +340,19 @@ cd frontend
 
 ---
 
-## Deployment & Release Status
+## Deployment & Release Management
 
-> [!IMPORTANT]
-> **Automated releases are currently non-functional.**  
-> Pre-built binary downloads, Debian `.deb` repositories, and `.AppImage` bundles are not yet automated in CI/CD. Please compile from source using the instructions above.
+Antlion ships automated releases across five Linux package formats via GitHub Actions on every tag push (`v*`):
 
-The planned release architecture will use [nfpm](https://github.com/goreleaser/nfpm) and `appimagetool` to produce:
-1. **Debian/Ubuntu Package (`.deb`)**: Native installation with `.desktop` file, icons, and system service integration.
-2. **Universal Linux Bundle (`.AppImage`)**: Single-file executable running on any modern Linux distribution.
-3. **Standalone Tarball (`.tar.gz`)**: Compiled binary with desktop assets for manual installation.
+| Format | Target Distribution | Installation Command |
+| :--- | :--- | :--- |
+| **`.deb`** | Debian 12+, Ubuntu 22.04/24.04, Pop!_OS, Mint | `sudo dpkg -i antlion-app.deb` |
+| **`.rpm`** | Fedora 38+, RHEL 9+, openSUSE | `sudo dnf install antlion-app.rpm` |
+| **`.pkg.tar.zst`** | Arch Linux, Manjaro, EndeavourOS | `sudo pacman -U antlion-app.pkg.tar.zst` |
+| **`.tar.gz`** | Any Linux Distro / Rootless | `./install.sh --user` (no root required) |
+| **`.AppImage`** | Universal Linux Standalone | `chmod +x antlion-app-x86_64.AppImage && ./antlion-app-x86_64.AppImage` |
+
+Pre-built binaries, cryptographic SHA256 checksums, and changelogs are published on [GitHub Releases](https://github.com/osspakistan/antlion-desktop/releases).
 
 ---
 

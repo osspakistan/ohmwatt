@@ -1,0 +1,35 @@
+changelog:
+  categories:
+    - title: "🚀 New Features"
+      labels:
+        - "feature"
+        - "enhancement"
+      prefix:
+        - "feat"
+    - title: "🐛 Bug Fixes"
+      labels:
+        - "fix"
+        - "bug"
+      prefix:
+        - "fix"
+    - title: "💅 Refactoring & Improvements"
+      labels:
+        - "refactor"
+        - "perf"
+        - "style"
+      prefix:
+        - "refactor"
+        - "perf"
+        - "style"
+    - title: "📦 Packaging & Tooling"
+      labels:
+        - "release"
+        - "build"
+      prefix:
+        - "build"
+        - "chore"
+    - title: "📚 Documentation"
+      labels:
+        - "docs"
+      prefix:
+        - "docs"
