@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="frontend/public/antlion-mark.svg" alt="Antlion Logo" width="88" height="88" />
+<img src="docs/assets/antlion-icon.png" alt="Antlion Logo" width="96" height="96" />
 
 # Antlion
 
