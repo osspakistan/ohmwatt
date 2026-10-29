@@ -3,16 +3,16 @@
 #
 # The lines below are called `modelines`. See `:help modeline`
 
-name: "antlion-app"
+name: "antlion"
 arch: ${GOARCH}
 platform: "linux"
 version: "0.1.0"
-section: "default"
-priority: "extra"
-maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
-description: "A antlion-app application"
-vendor: "My Company"
-homepage: "https://wails.io"
+section: "utils"
+priority: "optional"
+maintainer: "Awais alwaisy <awaisalwaisy@gmail.com>"
+description: "Calm, precision battery and power management desktop app"
+vendor: "OSS Pakistan"
+homepage: "https://alwaisy.dev"
 license: "MIT"
 release: "1"
 
