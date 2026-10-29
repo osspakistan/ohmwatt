@@ -4,8 +4,8 @@
 
 # OhmWatt
 
-**A calm, precision battery and power management desktop app for engineers.**  
-No synthetic math. No cloud tracking. 100% direct kernel telemetry.
+**A clean, accurate battery and power monitor for Linux laptops.**  
+No guesswork. No cloud tracking. 100% direct hardware readings.
 
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go)](https://golang.org)
 [![Wails v3](https://img.shields.io/badge/Wails-v3_Alpha-DF0000?style=flat-square)](https://v3.wails.io)
@@ -48,7 +48,7 @@ OhmWatt reads hardware registers directly from Linux kernel sysfs nodes, renderi
 ### The Solution
 
 - **Direct Kernel Telemetry**: Reads raw voltage (`voltage_now`), micro-amperes (`current_now`), power draw (`power_now`), micro-watt-hours (`energy_now` / `charge_now`), and ACPI cycle counts directly from `/sys/class/power_supply/`.
-- **Zero-Mock Engineering**: Real telemetry only. No simulated curves, no fake cycle numbers, and no placeholder historical sessions. The UI adapts automatically if a secondary battery is not installed.
+- **100% Real Hardware Data**: Real battery numbers only. No simulated curves, no fake cycle numbers, and no placeholder historical sessions. The UI adapts automatically if your laptop has one or two batteries.
 - **Persistent SQLite Ledger**: Every charge and discharge session, temperature threshold event, and daily degradation snapshot is saved locally to SQLite (`~/.local/share/ohmwatt/ohmwatt.db`) using Write-Ahead Logging (WAL).
 - **Lightweight Desktop Footprint**: Built with Go and Wails v3 Alpha using the system WebKitGTK renderer. Memory footprint sits around 15 to 25 MB RAM with negligible background CPU usage.
 - **In-App 2x Retina Snapshots**: Built-in screenshot engine captures clean 2x Retina PNGs of any view directly to `~/Downloads/` with screen name and timestamp.
@@ -113,7 +113,7 @@ To be completely transparent about the current state of OhmWatt, here is what is
 - **Tailwind CSS v4**: Ultra-fast utility styling engine with CSS variable design tokens.
 - **Radix Vue**: Accessible, headless primitives (Dialog, Sheet, Tooltip, Select, Switch).
 - **Icons**: Hugeicons, Lucide Vue Next, custom OhmWatt SVG iconography.
-- **Typography**: `@fontsource/instrument-sans` for high-readability engineering telemetry.
+- **Typography**: `@fontsource/instrument-sans` for clear, readable text.
 
 ### Tooling & Code Quality
 - **Bun**: Fast JavaScript package manager and test runner.
@@ -356,12 +356,12 @@ Pre-built binaries, cryptographic SHA256 checksums, and changelogs are published
 
 ---
 
-## Contribution & Engineering Directives
+## Contributing Guidelines
 
-Contributions from systems engineers and frontend developers are welcome. All changes must adhere to the project's engineering standards:
+Contributions are welcome from anyone who wants to improve OhmWatt. All changes must follow our core guidelines:
 
-### 1. Zero-Mock Policy
-OhmWatt is an engineering telemetry monitor. **Never hardcode fake numbers**, mock dates, static cycle counts (e.g. `212`), fake health values (e.g. `91%`), or synthetic DB seed sessions. If a machine lacks dual batteries (`BAT1`), the UI must gracefully adapt and hide the secondary vessel. Never show `(mock)` labels to end users.
+### 1. Real Hardware Data Only
+OhmWatt shows real hardware measurements. **Never hardcode fake numbers**, mock dates, static cycle counts (e.g. `212`), fake health values (e.g. `91%`), or synthetic seed sessions. If a laptop has a single battery (`BAT0`), the UI automatically hides the secondary battery vessel. Never show mock or placeholder data to users.
 
 ### 2. Strict Quality Gates
 Before submitting any pull request, ensure:

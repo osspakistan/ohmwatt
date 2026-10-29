@@ -1,18 +1,18 @@
 # Contributing to OhmWatt
 
-OhmWatt is an engineering-grade, calm power and battery telemetry monitor built with Go, Wails v3, Vue 3, and SQLite. Contributions that improve hardware accuracy, driver support, UI precision, and performance are welcome.
+OhmWatt is a clean, reliable battery monitor for Linux laptops, built with Go, Wails v3, Vue 3, and SQLite. Contributions that improve battery accuracy, hardware support, UI polish, and performance are welcome.
 
 ---
 
-## 1. Core Engineering Directives
+## 1. Core Guidelines
 
-All contributions must strictly adhere to three foundational engineering principles:
+All contributions must follow three principles:
 
-### A. Zero-Mock Policy
-OhmWatt is an engineering tool, not a concept mock.
+### A. Real Hardware Numbers Only
+OhmWatt is made for real laptop users, not a demo with fake data.
 - **Never commit fake numbers**: Do not hardcode static battery percentages (e.g. `91%`), synthetic cycle counts (e.g. `212`), dummy wattage, or simulated charge curves.
-- **Never mock hardware registers**: All telemetry must originate from real kernel sysfs entries (`/sys/class/power_supply/`), ACPI registers, or genuine platform APIs.
-- **Graceful hardware adaptation**: If a machine has a single battery (`BAT0`), automatically collapse and hide dual-battery vessels (`BAT1`). Never render placeholder `(mock)` labels to end users.
+- **Never mock hardware registers**: All battery data must come from real kernel sysfs entries (`/sys/class/power_supply/`), ACPI registers, or genuine platform APIs.
+- **Graceful hardware adaptation**: If a laptop has a single battery (`BAT0`), automatically collapse and hide dual-battery vessels (`BAT1`). Never render placeholder `(mock)` labels to end users.
 - **No synthetic seed databases**: Never commit pre-filled test databases or fake historical sessions.
 
 ### B. Local-First & Zero Telemetry
