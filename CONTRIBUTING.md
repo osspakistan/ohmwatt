@@ -54,7 +54,7 @@ OhmWatt is an engineering tool, not a concept mock.
 ### Initial Setup
 ```bash
 git clone https://github.com/osspakistan/ohmwatt.git
-cd ohmwatt/antlion-app
+cd ohmwatt
 
 # Install frontend dependencies
 cd frontend

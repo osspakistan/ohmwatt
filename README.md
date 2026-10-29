@@ -26,10 +26,10 @@ No synthetic math. No cloud tracking. 100% direct kernel telemetry.
 OhmWatt reads hardware registers directly from Linux kernel sysfs nodes, rendering live battery levels, ACPI cycle degradation, and real-time power draw:
 
 <div align="center">
-  <img src="docs/assets/antlion-dashboard-preview.png" alt="OhmWatt Dashboard Preview" width="92%" />
+  <img src="docs/assets/ohmwatt-dashboard-preview.png" alt="OhmWatt Dashboard Preview" width="92%" />
   <p><em>Live 2x Retina capture of OhmWatt running on Linux (HP EliteBook 850 G7) with ACPI cycle odometer and live 48-slot hourly telemetry strip.</em></p>
   <br />
-  <img src="docs/assets/antlion-health-preview.png" alt="OhmWatt Battery Health Preview" width="92%" />
+  <img src="docs/assets/ohmwatt-health-preview.png" alt="OhmWatt Battery Health Preview" width="92%" />
   <p><em>Battery Health analytics showing true milliwatt-hour capacity, wear delta, high-temperature stress hours, and deep discharge counts.</em></p>
 </div>
 
@@ -128,7 +128,7 @@ To be completely transparent about the current state of OhmWatt, here is what is
 A comprehensive nested view of the repository:
 
 ```
-antlion-app/
+ohmwatt/
 ├── AGENTS.md                          # Engineering directives (Zero-Mock policy, quality gates)
 ├── README.md                          # Project documentation and architecture guide
 ├── Taskfile.yml                       # Wails build, dev, package, and run automation tasks
@@ -167,18 +167,18 @@ antlion-app/
 ├── docs/                              # Project technical documentation & assets
 │   ├── ARCHITECTURE.md                # In-depth architectural blueprint
 │   └── assets/
-│       ├── antlion-dashboard-preview.png  # Retina dashboard screenshot
-│       └── antlion-health-preview.png     # Retina health screen screenshot
+│       ├── ohmwatt-dashboard-preview.png  # Retina dashboard screenshot
+│       └── ohmwatt-health-preview.png     # Retina health screen screenshot
 │
 ├── build/                             # Wails platform packaging configurations
 │   ├── config.yml                     # Wails v3 build configuration
 │   ├── appicon.png                    # App master icon
 │   ├── Taskfile.yml                   # Common build tasks
 │   ├── linux/                         # Linux desktop integration & packaging
-│   │   ├── antlion-app.desktop        # Linux XDG desktop entry
+│   │   ├── ohmwatt.desktop            # Linux XDG desktop entry
 │   │   ├── Taskfile.yml               # Linux build tasks
-│   │   ├── appimage/build.sh          # AppImage generation script (WIP)
-│   │   └── nfpm/nfpm.yaml             # Debian .deb package definition (WIP)
+│   │   ├── appimage/build.sh          # AppImage generation script
+│   │   └── nfpm/nfpm.yaml             # Linux packages definition (.deb, .rpm, .pkg.tar.zst)
 │   ├── windows/                       # Windows MSIX, NSIS, manifest configs
 │   ├── darwin/                        # macOS plist, icons, dmg configs
 │   ├── android/                       # Android wrapper configs
@@ -195,8 +195,8 @@ antlion-app/
     ├── index.html                     # Web entry point
     │
     ├── public/                        # Static public branding assets
-    │   ├── antlion-mark.svg           # Primary Antlion vector logo
-    │   ├── antlion-app-icon.svg       # Desktop app icon
+    │   ├── ohmwatt-mark.svg           # Primary OhmWatt vector logo
+    │   ├── ohmwatt-app-icon.svg       # Desktop app icon
     │   └── favicon.ico                # Browser / window favicon
     │
     ├── bindings/                      # Auto-generated Wails v3 TypeScript bindings

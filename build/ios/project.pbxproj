@@ -180,8 +180,8 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.antlionapp";
-				PRODUCT_NAME = "My Product";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.alwaisy.ohmwatt";
+				PRODUCT_NAME = "OhmWatt";
 				CODE_SIGNING_ALLOWED = NO;
 				SDKROOT = iphoneos;
 			};
@@ -196,8 +196,8 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.antlionapp";
-				PRODUCT_NAME = "My Product";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.alwaisy.ohmwatt";
+				PRODUCT_NAME = "OhmWatt";
 				CODE_SIGNING_ALLOWED = NO;
 				SDKROOT = iphoneos;
 			};

@@ -17,7 +17,7 @@ OhmWatt follows a **two-tier architecture**:
 └───────────────────────────────────▲────────────────────────────────────┘
                                     │ Wails v3 RPC & Events
 ┌───────────────────────────────────▼────────────────────────────────────┐
-│                   Go Backend (antlion-app/)                            │
+│                   Go Backend (ohmwatt/)                                │
 │   service/ ──> core/ (models, rules, db) ──> platform/ (drivers)       │
 └───────────────────────────────────▲────────────────────────────────────┘
                                     │
@@ -36,7 +36,7 @@ OhmWatt follows a **two-tier architecture**:
 ## 2. Directory Layout & Boundaries
 
 ```
-antlion-app/
+ohmwatt/
 ├── docs/                               <-- Architecture and technical references
 │   └── ARCHITECTURE.md                 <-- This document
 │
@@ -106,7 +106,7 @@ antlion-app/
 │   │   ├── snapshots.go                # Daily health snapshot repository
 │   │   ├── sessions.go                 # Charge/discharge session logging
 │   │   └── migrations/                 # Embedded SQL schema migrations
-│   └── config/                         # App settings (JSON/TOML in ~/.config/antlion)
+│   └── config/                         # App settings (JSON/TOML in ~/.config/ohmwatt)
 │       └── config.go
 │
 ├── service/                            # Wails Application Services (bound to frontend TS)
@@ -148,10 +148,10 @@ package platform
 
 import (
 	"context"
-	"antlion-app/core/battery"
-	"antlion-app/core/hardware"
-	"antlion-app/core/hibernate"
-	"antlion-app/core/power"
+	"ohmwatt/core/battery"
+	"ohmwatt/core/hardware"
+	"ohmwatt/core/hibernate"
+	"ohmwatt/core/power"
 )
 
 type BatteryBackend interface {

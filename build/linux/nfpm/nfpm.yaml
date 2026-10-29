@@ -21,7 +21,7 @@ contents:
     dst: "/usr/local/bin/ohmwatt"
   - src: "./build/appicon.png"
     dst: "/usr/share/icons/hicolor/128x128/apps/ohmwatt.png"
-  - src: "./frontend/public/antlion-mark-512.png"
+  - src: "./frontend/public/ohmwatt-mark-512.png"
     dst: "/usr/share/icons/hicolor/512x512/apps/ohmwatt.png"
   - src: "./frontend/public/ohmwatt-mark.svg"
     dst: "/usr/share/icons/hicolor/scalable/apps/ohmwatt.svg"

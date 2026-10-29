@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-10-29
+
+### Changed
+- Finalized brand transition to OhmWatt across all platform build descriptors, installer manifests, desktop configs, and documentation.
+- Upgraded GitHub Actions release automation dependencies (`actions/checkout@v7`, `actions/setup-go@v7`, `softprops/action-gh-release@v3`).
+- Added official OhmWatt 512x512 high-resolution icon assets to package definitions.
+
+---
+
 ## [0.1.0] - 2026-10-29
 
 ### Initial Linux Release
