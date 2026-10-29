@@ -5,7 +5,7 @@
 - **Git Commit Protocol**: Commit per task (atomic, granular commits). Do not bundle unrelated changes together.
 
 ## 2. Zero Hardcoded / Mock Data Policy
-- **100% Real Hardware Telemetry**: OhmWatt is an engineering power monitor. Never hardcode fake battery numbers, mock dates, static cycle counts (e.g., `212`), fake health values (e.g., `91%`), or synthetic DB seed sessions.
+- **100% Real Hardware Data**: OhmWatt is an accurate power monitor for everyday users. Never hardcode fake battery numbers, mock dates, static cycle counts (e.g., `212`), fake health values (e.g., `91%`), or synthetic DB seed sessions.
 - **Live Bindings Integration**:
   - `Health` view must bind directly to `useBattery()` and `BatteryService.GetBatteryHealth()`.
   - `Device` view must bind dynamically to `DeviceService.GetDeviceSpecs()` and `DeviceService.GetAdapterInfo()`.
