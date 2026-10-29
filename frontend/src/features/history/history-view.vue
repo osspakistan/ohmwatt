@@ -81,7 +81,7 @@ onUnmounted(() => {
       <div>
         <h1 class="font-serif text-4xl tracking-tight text-foreground">History</h1>
         <p class="text-muted-foreground mt-1.5">
-          Real persistent charging sessions and power telemetry from local SQLite database.
+          Charge and discharge history saved locally on your laptop.
         </p>
       </div>
       <SegmentControl v-model="activeTab" :options="tabOptions" />

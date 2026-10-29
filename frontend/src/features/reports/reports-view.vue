@@ -149,7 +149,7 @@ onMounted(async () => {
         >
           This battery operates at {{ battery.healthPercentage }}% retained capacity relative to OEM
           factory specifications. Physical fuel gauge logs {{ battery.cycleCount }} lifetime cycles.
-          Chemical degradation rate is measured across historical sysfs telemetry.
+          Battery health degradation is tracked over time from real battery charge history.
         </div>
       </div>
     </div>

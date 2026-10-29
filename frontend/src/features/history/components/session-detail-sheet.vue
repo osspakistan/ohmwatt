@@ -123,7 +123,7 @@ function formatDate(isoStr: string): string {
           <h4
             class="text-xs uppercase font-mono tracking-wider text-muted-foreground font-semibold"
           >
-            Electrical Telemetry
+            Power Details
           </h4>
           <div class="divide-y divide-border rounded-xl border border-border bg-card p-4 text-xs">
             <div class="flex items-center justify-between py-2 first:pt-0">
@@ -200,8 +200,8 @@ function formatDate(isoStr: string): string {
           class="rounded-xl border border-border bg-muted/20 p-4 text-xs text-muted-foreground leading-relaxed"
         >
           <p v-if="session.isOngoing" class="text-primary font-medium">
-            ● Session active: real-time telemetry is continuously streaming from the kernel power
-            subsystem. Duration and cycle accumulation will finalize when the session ends.
+            ● Session active: power usage is recording live. Total time and battery cycles will
+            finalize when the session ends.
           </p>
           <p v-else-if="session.isHot" class="text-destructive font-medium">
             ⚠ High thermal stress recorded during this session. Sustained heat accelerates lithium
